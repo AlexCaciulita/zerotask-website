@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroTask | AI Automation for Local Businesses</title>
+    <meta name="description" content="Automate reviews, appointments, and lead capture. Save 10+ hours per week with AI-powered automation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #0ea5e9;
+            --accent: #10b981;
+            --dark: #0f172a;
+            --gray-900: #1e293b;
+            --gray-700: #334155;
+            --gray-500: #64748b;
+            --gray-400: #94a3b8;
+            --gray-300: #cbd5e1;
+            --gray-200: #e2e8f0;
+            --gray-100: #f1f5f9;
+            --gray-50: #f8fafc;
+            --white: #ffffff;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #0ea5e9 100%);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--gray-900);
+            line-height: 1.6;
+            background: var(--white);
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+        
+        .logo span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-logo-img {
+            height: 40px;
+            width: auto;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--gray-500);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover { color: var(--dark); }
+        
+        .nav-cta {
+            background: var(--primary) !important;
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600 !important;
+            transition: all 0.2s;
+        }
+        
+        .nav-cta:hover {
+            background: var(--primary-dark) !important;
+            transform: translateY(-1px);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 140px 24px 80px;
+            background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
+            position: relative;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: url('images/hero-abstract.png') no-repeat center right;
+            background-size: cover;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+        
+        .hero h1 span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--gray-500);
+            margin-bottom: 32px;
+            max-width: 500px;
+        }
+        
+        .hero-ctas {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+        
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--white);
+            color: var(--gray-700);
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s;
+            border: 2px solid var(--gray-200);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .hero-stat {
+            text-align: left;
+        }
+        
+        .hero-stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+        
+        .hero-stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        /* Hero Demo */
+        .hero-demo {
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .demo-header {
+            background: var(--gray-100);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .demo-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .demo-dot.red { background: #ff5f57; }
+        .demo-dot.yellow { background: #febc2e; }
+        .demo-dot.green { background: #28c840; }
+        
+        .demo-content {
+            padding: 24px;
+        }
+        
+        .demo-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-400);
+            margin-bottom: 12px;
+        }
+        
+        /* Review Card */
+        .review-card {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .review-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .review-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .review-info h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .review-info .stars {
+            color: var(--yellow);
+            font-size: 0.75rem;
+        }
+        
+        .review-text {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+        
+        .ai-response {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+            border-radius: 12px;
+            padding: 16px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .ai-response-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .ai-badge {
+            background: var(--gradient);
+            color: white;
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .ai-response-header span {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+        
+        .ai-response-text {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+        
+        /* Logos Section */
+        .logos-section {
+            padding: 60px 24px;
+            background: var(--white);
+            border-top: 1px solid var(--gray-100);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .logos-label {
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-400);
+            margin-bottom: 32px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .logos-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            opacity: 0.6;
+        }
+        
+        .logo-item {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-400);
+        }
+        
+        .client-logo {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+            filter: grayscale(100%);
+            opacity: 0.7;
+            transition: all 0.3s;
+        }
+        
+        .client-logo:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+        }
+        
+        /* As Seen On */
+        .as-seen-on {
+            padding: 40px 24px;
+            background: var(--gray-50);
+        }
+        
+        .as-seen-label {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-400);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .press-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+        
+        .press-logo {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--gray-300);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* Results Section */
+        .results {
+            padding: 100px 24px;
+            background: var(--white);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-label {
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 16px;
+        }
+        
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--gray-500);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .dashboard-carousel {
+            margin-bottom: 60px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .carousel-container {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        
+        .carousel-img {
+            width: 100%;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .carousel-img.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gray-300);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .dot.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+        
+        .dot:hover {
+            background: var(--primary);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+        }
+        
+        .result-card {
+            text-align: center;
+            padding: 32px;
+            background: var(--gray-50);
+            border-radius: 16px;
+        }
+        
+        .result-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .result-label {
+            font-size: 1rem;
+            color: var(--gray-500);
+        }
+        
+        /* Problem Section */
+        .problem {
+            padding: 100px 24px;
+            background: var(--gray-900);
+            color: var(--white);
+        }
+        
+        .problem .section-label { color: var(--red); }
+        .problem .section-title { color: var(--white); }
+        .problem .section-subtitle { color: var(--gray-400); }
+        
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        
+        .problem-card {
+            background: rgba(255,255,255,0.05);
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .problem-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .problem-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .problem-card p {
+            color: var(--gray-400);
+        }
+        
+        .problem-stat {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.875rem;
+        }
+        
+        .problem-stat strong {
+            color: var(--red);
+        }
+        
+        /* Solution/Demo Section */
+        .demo-section {
+            padding: 100px 24px;
+            background: var(--white);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+        
+        .demo-before-after {
+            display: grid;
+            gap: 24px;
+        }
+        
+        .demo-box {
+            background: var(--gray-50);
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px solid var(--gray-200);
+        }
+        
+        .demo-box.before {
+            border-color: var(--red);
+            background: rgba(239, 68, 68, 0.05);
+        }
+        
+        .demo-box.after {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .demo-box-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        
+        .demo-box.before .demo-box-label {
+            background: var(--red);
+            color: white;
+        }
+        
+        .demo-box.after .demo-box-label {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .demo-box h4 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .demo-box p {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        .demo-mockup-img {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            margin-top: 24px;
+        }
+        
+        .demo-content-right h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .demo-content-right p {
+            color: var(--gray-500);
+            margin-bottom: 24px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+        
+        .feature-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .feature-check {
+            width: 24px;
+            height: 24px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        /* Services Section */
+        .services {
+            padding: 100px 24px;
+            background: var(--gray-50);
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        
+        .service-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+        
+        .service-card.featured {
+            border: 2px solid var(--primary);
+        }
+        
+        .service-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: 20px;
+            right: -32px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 4px 40px;
+            transform: rotate(45deg);
+        }
+        
+        .service-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--gradient);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 24px;
+        }
+        
+        .service-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--dark);
+        }
+        
+        .service-card > p {
+            color: var(--gray-500);
+            margin-bottom: 24px;
+        }
+        
+        .service-mockup {
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto 24px;
+            display: block;
+            border-radius: 12px;
+        }
+        
+        .service-features {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+        
+        .service-features li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .service-features li:last-child { border: none; }
+        
+        .service-features li::before {
+            content: '✓';
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        .service-price {
+            margin-top: auto;
+        }
+        
+        .service-price .amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--dark);
+        }
+        
+        .service-price .period {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+        
+        .service-price .setup {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            padding: 100px 24px;
+            background: var(--white);
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        
+        .testimonial-card {
+            background: var(--gray-50);
+            padding: 32px;
+            border-radius: 16px;
+        }
+        
+        .testimonial-stars {
+            color: var(--yellow);
+            margin-bottom: 16px;
+        }
+        
+        .testimonial-text {
+            font-size: 1rem;
+            color: var(--gray-700);
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .testimonial-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+        
+        .testimonial-photo {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--gray-200);
+        }
+        
+        .testimonial-info h4 {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .testimonial-info p {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+        
+        /* Process */
+        .process {
+            padding: 100px 24px;
+            background: var(--gray-900);
+            color: var(--white);
+        }
+        
+        .process .section-label { color: var(--secondary); }
+        .process .section-title { color: var(--white); }
+        .process .section-subtitle { color: var(--gray-400); }
+        
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 60px;
+        }
+        
+        .process-step {
+            text-align: center;
+            padding: 32px 24px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            position: relative;
+        }
+        
+        .process-number {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+        
+        .process-step h3 {
+            font-size: 1.125rem;
+            margin-bottom: 8px;
+        }
+        
+        .process-step p {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+        
+        /* FAQ */
+        .faq {
+            padding: 100px 24px;
+            background: var(--gray-50);
+        }
+        
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            background: var(--white);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            padding: 24px;
+            font-weight: 600;
+            color: var(--dark);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .faq-answer {
+            padding: 0 24px 24px;
+            color: var(--gray-500);
+            line-height: 1.7;
+        }
+        
+        /* Final CTA */
+        .final-cta {
+            padding: 120px 24px;
+            background: var(--gradient);
+            text-align: center;
+        }
+        
+        .final-cta h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .final-cta p {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .final-cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .btn-white {
+            background: white;
+            color: var(--primary);
+            padding: 18px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .final-cta-note {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.875rem;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 60px 24px;
+            background: var(--dark);
+            color: var(--gray-400);
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+        }
+        
+        .footer-logo-img {
+            height: 36px;
+            width: auto;
+            filter: brightness(0) invert(1);
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 32px;
+        }
+        
+        .footer-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover { color: white; }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-grid { grid-template-columns: 1fr; }
+            .hero-demo { margin-top: 40px; }
+            .results-grid { grid-template-columns: repeat(2, 1fr); }
+            .problem-grid { grid-template-columns: 1fr; }
+            .services-grid { grid-template-columns: 1fr; }
+            .testimonials-grid { grid-template-columns: 1fr; }
+            .process-steps { grid-template-columns: repeat(2, 1fr); }
+            .demo-grid { grid-template-columns: 1fr; }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .section-title { font-size: 2rem; }
+            .final-cta h2 { font-size: 2rem; }
+            .nav-links { display: none; }
+            .hero-ctas { flex-direction: column; }
+            .hero-stats { flex-direction: column; gap: 20px; }
+            .results-grid { grid-template-columns: 1fr; }
+            .process-steps { grid-template-columns: 1fr; }
+            .final-cta-buttons { flex-direction: column; align-items: center; }
+            .footer-content { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <a href="#" class="logo">
+                <img src="images/zerotask-logo.png" alt="ZeroTask" class="nav-logo-img">
+            </a>
+            <div class="nav-links">
+                <a href="#services">Services</a>
+                <a href="#results">Results</a>
+                <a href="#testimonials">Reviews</a>
+                <a href="#contact" class="nav-cta">Get Started →</a>
+            </div>
+        </div>
+    </nav>
+    
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="dot"></span>
+                        Now serving Seattle businesses
+                    </div>
+                    <h1>Stop doing busywork.<br><span>Let AI handle it.</span></h1>
+                    <p>Review responses, appointment reminders, lead capture — automated and running 24/7 while you focus on growth.</p>
+                    <div class="hero-ctas">
+                        <a href="#contact" class="btn-primary">
+                            Get Free Audit
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                        <a href="#demo" class="btn-secondary">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            See Demo
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">10+</div>
+                            <div class="hero-stat-label">Hours saved weekly</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">70%</div>
+                            <div class="hero-stat-label">Fewer no-shows</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">$2k+</div>
+                            <div class="hero-stat-label">Monthly savings</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hero-demo">
+                    <div class="demo-header">
+                        <span class="demo-dot red"></span>
+                        <span class="demo-dot yellow"></span>
+                        <span class="demo-dot green"></span>
+                    </div>
+                    <div class="demo-content">
+                        <div class="demo-label">Incoming Review</div>
+                        <div class="review-card">
+                            <div class="review-header">
+                                <div class="review-avatar">J</div>
+                                <div class="review-info">
+                                    <h4>Jennifer M.</h4>
+                                    <div class="stars">⭐⭐⭐ 3/5</div>
+                                </div>
+                            </div>
+                            <div class="review-text">"Service was okay but had to wait 30 minutes past my appointment time. The actual work was fine but communication could be better..."</div>
+                        </div>
+                        
+                        <div class="demo-label">⚡ AI Response Generated in 3 seconds</div>
+                        <div class="ai-response">
+                            <div class="ai-response-header">
+                                <span class="ai-badge">AI Generated</span>
+                                <span>Ready to send</span>
+                            </div>
+                            <div class="ai-response-text">"Hi Jennifer, thank you for your feedback. I apologize for the wait time — that's not the experience we want for our clients. We're reviewing our scheduling process to prevent this. I'd love the chance to make it up to you. Please reach out directly..."</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="logos-section">
+        <div class="container">
+            <div class="logos-label">Trusted by Seattle's best businesses</div>
+            <div class="logos-grid">
+                <img src="images/logo-ballard-dental.png" alt="Ballard Family Dental" class="client-logo">
+                <img src="images/logo-pike-law.png" alt="Pike Law Group" class="client-logo">
+                <img src="images/logo-emerald-realty.png" alt="Emerald City Realty" class="client-logo">
+                <img src="images/logo-zen-spa.png" alt="Zen Wellness Spa" class="client-logo">
+                <img src="images/logo-pacific-hvac.png" alt="Pacific HVAC" class="client-logo">
+            </div>
+        </div>
+    </section>
+    
+    <section class="as-seen-on">
+        <div class="container">
+            <div class="as-seen-label">As Featured In</div>
+            <div class="press-logos">
+                <div class="press-logo">📰 Seattle Times</div>
+                <div class="press-logo">💼 GeekWire</div>
+                <div class="press-logo">📱 TechCrunch</div>
+                <div class="press-logo">🏢 Seattle Business</div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="results" id="results">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Results</div>
+                <h2 class="section-title">Real numbers from real clients</h2>
+                <p class="section-subtitle">Our automation solutions deliver measurable ROI from day one.</p>
+            </div>
+            <div class="dashboard-carousel">
+                <div class="carousel-container">
+                    <img src="images/dashboard-real-0.png" alt="Email Notifications" class="carousel-img active">
+                    <img src="images/dashboard-real-1.png" alt="Review Analytics" class="carousel-img">
+                    <img src="images/dashboard-real-2.png" alt="Appointment Metrics" class="carousel-img">
+                </div>
+                <div class="carousel-dots">
+                    <span class="dot active" data-index="0"></span>
+                    <span class="dot" data-index="1"></span>
+                    <span class="dot" data-index="2"></span>
+                </div>
+            </div>
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-number">847</div>
+                    <div class="result-label">Reviews responded to</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-number">$127k</div>
+                    <div class="result-label">Saved in recovered appointments</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-number">2,340</div>
+                    <div class="result-label">Leads captured after hours</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-number">94%</div>
+                    <div class="result-label">Client satisfaction rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="problem">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">The Problem</div>
+                <h2 class="section-title">You're losing money every day</h2>
+                <p class="section-subtitle">These silent revenue killers are costing your business thousands.</p>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">😤</div>
+                    <h3>Ignored Reviews</h3>
+                    <p>Every unanswered review tells potential customers you don't care. Your competitor responds. They book there instead.</p>
+                    <div class="problem-stat"><strong>53%</strong> of customers expect a response within 7 days</div>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">💸</div>
+                    <h3>No-Show Appointments</h3>
+                    <p>They forgot. You lose $200-500 per empty slot. That's $3,000+ per month vanishing from your revenue.</p>
+                    <div class="problem-stat"><strong>$150B</strong> lost annually to no-shows in US healthcare alone</div>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">😴</div>
+                    <h3>After-Hours Leads</h3>
+                    <p>63% of website visits happen outside business hours. No one to answer questions. They leave. They don't come back.</p>
+                    <div class="problem-stat"><strong>78%</strong> of leads go to the first business that responds</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="demo-section" id="demo">
+        <div class="container">
+            <div class="demo-grid">
+                <div class="demo-before-after">
+                    <div class="demo-box before">
+                        <div class="demo-box-label">❌ Before ZeroTask</div>
+                        <h4>Manual review responses</h4>
+                        <p>5-10 minutes per review. 20 reviews = 3+ hours per week. Often ignored because "who has time?"</p>
+                    </div>
+                    <div class="demo-box after">
+                        <div class="demo-box-label">✓ After ZeroTask</div>
+                        <h4>AI-powered responses</h4>
+                        <p>Personalized, professional responses in 3 seconds. You just approve. 3 hours → 10 minutes.</p>
+                    </div>
+                    <img src="images/review-mockup-new.png" alt="Review Response Demo" class="demo-mockup-img">
+                </div>
+                <div class="demo-content-right">
+                    <h3>See the difference in seconds</h3>
+                    <p>Our AI doesn't just respond — it responds intelligently. Positive reviews get warm appreciation. Negative reviews get professional damage control that takes the conversation offline.</p>
+                    <ul class="feature-list">
+                        <li>
+                            <span class="feature-check">✓</span>
+                            <span>Personalized to each reviewer's specific comments</span>
+                        </li>
+                        <li>
+                            <span class="feature-check">✓</span>
+                            <span>Matches your brand voice and tone</span>
+                        </li>
+                        <li>
+                            <span class="feature-check">✓</span>
+                            <span>Handles negative reviews without admitting fault</span>
+                        </li>
+                        <li>
+                            <span class="feature-check">✓</span>
+                            <span>Review before posting or fully automated</span>
+                        </li>
+                    </ul>
+                    <a href="#contact" class="btn-primary">Try It Free →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Services</div>
+                <h2 class="section-title">Choose your automation package</h2>
+                <p class="section-subtitle">From single solutions to full business automation.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">⚡</div>
+                    <h3>Review Responder</h3>
+                    <p>AI-powered responses to every Google review, automatically.</p>
+                    <ul class="service-features">
+                        <li>Unlimited review responses</li>
+                        <li>Personalized to each review</li>
+                        <li>Approval workflow included</li>
+                        <li>Weekly performance report</li>
+                    </ul>
+                    <div class="service-price">
+                        <span class="amount">$300</span><span class="period">/month</span>
+                        <p class="setup">$2,000 one-time setup</p>
+                    </div>
+                </div>
+                
+                <div class="service-card featured">
+                    <div class="service-icon">🚀</div>
+                    <h3>Business Autopilot</h3>
+                    <p>Complete automation suite for maximum efficiency.</p>
+                    <img src="images/sms-mockup.png" alt="SMS Reminders" class="service-mockup">
+                    <ul class="service-features">
+                        <li>Everything in Review Responder</li>
+                        <li>SMS + Email appointment reminders</li>
+                        <li>No-show recovery automation</li>
+                        <li>Monthly strategy call</li>
+                    </ul>
+                    <div class="service-price">
+                        <span class="amount">$500</span><span class="period">/month</span>
+                        <p class="setup">$3,500 one-time setup</p>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">🤖</div>
+                    <h3>24/7 Lead Engine</h3>
+                    <p>Capture and qualify leads around the clock.</p>
+                    <ul class="service-features">
+                        <li>AI website chatbot</li>
+                        <li>Lead qualification flow</li>
+                        <li>CRM integration</li>
+                        <li>Instant lead notifications</li>
+                    </ul>
+                    <div class="service-price">
+                        <span class="amount">$400</span><span class="period">/month</span>
+                        <p class="setup">$3,000 one-time setup</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Testimonials</div>
+                <h2 class="section-title">What our clients say</h2>
+                <p class="section-subtitle">Don't take our word for it — hear from business owners like you.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"We were drowning in Google reviews. Now they're all handled automatically, and our rating went from 4.2 to 4.7 stars in three months. Game changer."</p>
+                    <div class="testimonial-author">
+                        <img src="images/testimonial-rachel.png" alt="Dr. Rachel Kim" class="testimonial-photo">
+                        <div class="testimonial-info">
+                            <h4>Dr. Rachel Kim</h4>
+                            <p>Ballard Family Dental</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"No-shows were killing us. After implementing the reminder system, they dropped by 65%. That's an extra $4,000/month we were leaving on the table."</p>
+                    <div class="testimonial-author">
+                        <img src="images/testimonial-mike.png" alt="Mike Johnson" class="testimonial-photo">
+                        <div class="testimonial-info">
+                            <h4>Mike Johnson</h4>
+                            <p>Pacific Northwest HVAC</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                    <p class="testimonial-text">"The chatbot captured 23 leads in its first week — at 2am, 5am, whenever. These are clients I would have lost completely before."</p>
+                    <div class="testimonial-author">
+                        <img src="images/testimonial-sarah.png" alt="Sarah Lopez" class="testimonial-photo">
+                        <div class="testimonial-info">
+                            <h4>Sarah Lopez</h4>
+                            <p>Emerald City Realty</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="process">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">How It Works</div>
+                <h2 class="section-title">Live in 7 days or less</h2>
+                <p class="section-subtitle">Simple process, fast results, zero hassle.</p>
+            </div>
+            <div class="process-steps">
+                <div class="process-step">
+                    <div class="process-number">1</div>
+                    <h3>Free Audit</h3>
+                    <p>15-minute call to identify your biggest automation opportunities.</p>
+                </div>
+                <div class="process-step">
+                    <div class="process-number">2</div>
+                    <h3>Custom Plan</h3>
+                    <p>We design a system tailored to your specific workflows.</p>
+                </div>
+                <div class="process-step">
+                    <div class="process-number">3</div>
+                    <h3>Build & Test</h3>
+                    <p>We build everything and test thoroughly before launch.</p>
+                </div>
+                <div class="process-step">
+                    <div class="process-number">4</div>
+                    <h3>Go Live</h3>
+                    <p>Flip the switch and watch the busywork disappear.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="faq">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">FAQ</div>
+                <h2 class="section-title">Common questions</h2>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question">How long until I see results?</div>
+                    <div class="faq-answer">Most clients see immediate results — review responses start working day one, and appointment reminder improvements show within the first week. ROI is typically positive within the first month.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Will the AI responses sound robotic?</div>
+                    <div class="faq-answer">No. We train the AI on your brand voice and customize responses to feel personal and authentic. Most customers can't tell the difference from a human-written response.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">What if I want to approve responses first?</div>
+                    <div class="faq-answer">Totally up to you. You can set it to fully automatic, approval-required, or hybrid (auto-approve positive reviews, manual approval for negative). Your choice.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Do you offer refunds?</div>
+                    <div class="faq-answer">We offer a 30-day satisfaction guarantee on monthly services. If you're not seeing value, we'll work with you to fix it or refund your first month.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="final-cta" id="contact">
+        <div class="container">
+            <h2>Ready to eliminate busywork?</h2>
+            <p>Book a free 15-minute audit. We'll show you exactly what can be automated and how much time and money you'll save.</p>
+            <div class="final-cta-buttons">
+                <a href="mailto:alex@zerotask.co?subject=Free Automation Audit" class="btn-white">
+                    Book Free Audit →
+                </a>
+            </div>
+            <p class="final-cta-note">No commitment • No credit card • Just answers</p>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <img src="images/zerotask-logo.png" alt="ZeroTask" class="footer-logo-img">
+                <div class="footer-links">
+                    <a href="mailto:alex@zerotask.co">alex@zerotask.co</a>
+                    <a href="#services">Services</a>
+                    <a href="#testimonials">Reviews</a>
+                </div>
+                <p>© 2026 ZeroTask. Seattle, WA.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Dashboard Carousel Auto-rotation
+        (function() {
+            const images = document.querySelectorAll('.carousel-img');
+            const dots = document.querySelectorAll('.dot');
+            let currentIndex = 0;
+            
+            function showSlide(index) {
+                images.forEach((img, i) => {
+                    img.classList.remove('active');
+                    dots[i].classList.remove('active');
+                });
+                images[index].classList.add('active');
+                dots[index].classList.add('active');
+            }
+            
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % images.length;
+                showSlide(currentIndex);
+            }
+            
+            // Auto-rotate every 6 seconds
+            setInterval(nextSlide, 6000);
+            
+            // Click on dots to navigate
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    showSlide(currentIndex);
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
