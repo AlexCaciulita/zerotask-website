@@ -1,10 +1,26 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 // Server-side only — ANTHROPIC_API_KEY is never exposed to the browser
-// Next.js only exposes env vars prefixed with NEXT_PUBLIC_ to the client
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// Lazy singleton: reads from .env.local as fallback if system env var is empty
+// (handles case where ANTHROPIC_API_KEY="" is set in shell profile by Claude Code)
+let _client: Anthropic | null = null;
+function getClient(): Anthropic {
+  if (!_client) {
+    let apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      // Fallback: read directly from .env.local
+      try {
+        const envFile = readFileSync(resolve(process.cwd(), '.env.local'), 'utf-8');
+        const match = envFile.match(/^ANTHROPIC_API_KEY=(.+)$/m);
+        if (match) apiKey = match[1].trim();
+      } catch {}
+    }
+    _client = new Anthropic({ apiKey: apiKey || undefined });
+  }
+  return _client;
+}
 
 // Model routing — cheap for simple tasks, smart for creative/strategic
 const MODELS = {
@@ -32,7 +48,7 @@ export async function aiGenerate(
     system,
   } = options;
 
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: MODELS[tier],
     max_tokens: maxTokens,
     temperature,
@@ -59,7 +75,7 @@ export async function* aiStream(
     system,
   } = options;
 
-  const stream = client.messages.stream({
+  const stream = getClient().messages.stream({
     model: MODELS[tier],
     max_tokens: maxTokens,
     temperature,

@@ -111,7 +111,9 @@ CREATE TABLE IF NOT EXISTS credits (
   monthly_allocation int DEFAULT 30,
   used_this_month int DEFAULT 0,
   purchased_credits int DEFAULT 0,
+  bonus_credit_used boolean DEFAULT false,
   billing_cycle_start timestamptz DEFAULT now(),
+  created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
@@ -332,6 +334,14 @@ ALTER TABLE launch_steps ADD COLUMN IF NOT EXISTS description text;
 ALTER TABLE launch_steps ADD COLUMN IF NOT EXISTS week_label text;
 ALTER TABLE launch_steps ADD COLUMN IF NOT EXISTS sort_order int DEFAULT 0;
 ALTER TABLE launch_steps ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
+
+
+-- ═══════════════════════════════════════════════════════
+-- PART 8: PATCH — Missing columns on credits table
+-- ═══════════════════════════════════════════════════════
+
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS bonus_credit_used boolean DEFAULT false;
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT now();
 
 
 -- ═══════════════════════════════════════════════════════

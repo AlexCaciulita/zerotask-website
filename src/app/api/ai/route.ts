@@ -22,13 +22,8 @@ export async function POST(req: NextRequest) {
     const auth = await authenticateRequest(req);
     if (isAuthError(auth)) return auth;
 
-    // Check API key is configured
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json(
-        { error: 'ANTHROPIC_API_KEY not configured' },
-        { status: 500 }
-      );
-    }
+    // Note: ANTHROPIC_API_KEY validation is handled by the Anthropic SDK client
+    // in src/lib/ai.ts (with .env.local fallback for empty system env vars)
 
     // ── Layer 1: Rate Limiting ──────────────────────────────────
     const credits = await getServerCredits(auth.user.id);
