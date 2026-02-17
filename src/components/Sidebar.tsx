@@ -6,14 +6,15 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import {
   LayoutDashboard, Search, Video, Copy, Swords, Star,
-  Rocket, Users, Globe, Settings, ChevronLeft, ChevronRight,
-  Moon, Sun, ChevronDown, Plus, Check, FlaskConical, PanelLeftClose, PanelLeft
+  Rocket, Users, Globe, Settings,
+  Moon, Sun, ChevronDown, Plus, Check, FlaskConical, PanelLeftClose, PanelLeft,
+  LogOut, Crown, Zap
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useActiveApp } from '@/lib/useActiveApp';
 import { useAuth } from '@/lib/auth';
 import { useSubscription } from '@/lib/subscription';
-import { LogOut, Crown } from 'lucide-react';
+import { useCreditContext } from '@/lib/credit-context';
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -42,9 +43,18 @@ export default function Sidebar() {
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
   const { isPro } = useSubscription();
+  const { credits, loading: creditsLoading } = useCreditContext();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  // Broadcast sidebar width to CSS so main content offset responds
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--sidebar-current',
+      collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)'
+    );
+  }, [collapsed]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -193,6 +203,81 @@ export default function Sidebar() {
             );
           })}
         </nav>
+
+        {/* Credit Counter — links to /pricing when depleted, /settings otherwise */}
+        {user && (
+          <div className={cn('px-3 pb-2', collapsed && 'px-2')}>
+            {collapsed ? (
+              <Link
+                href={credits.warning === 'depleted' || credits.warning === 'critical' ? '/pricing' : '/settings'}
+                className={cn(
+                  'flex items-center justify-center w-full p-2 rounded-xl transition-all',
+                  credits.warning === 'depleted'
+                    ? 'bg-red-500/20 text-red-400'
+                    : credits.warning === 'critical'
+                      ? 'bg-amber-500/20 text-amber-400'
+                      : credits.warning === 'low'
+                        ? 'bg-amber-500/10 text-amber-300'
+                        : 'bg-neutral-800/50 text-neutral-400 hover:bg-neutral-800'
+                )}
+                title={`${credits.remaining} credits remaining`}
+              >
+                {creditsLoading ? (
+                  <div className="w-4 h-4 rounded-full border-2 border-neutral-600 border-t-neutral-400 animate-spin" />
+                ) : (
+                  <span className="text-xs font-bold">{credits.remaining}</span>
+                )}
+              </Link>
+            ) : (
+              <Link
+                href={credits.warning === 'depleted' || credits.warning === 'critical' ? '/pricing' : '/settings'}
+                className={cn(
+                  'flex items-center gap-2.5 w-full rounded-xl px-3 py-2 transition-all',
+                  credits.warning === 'depleted'
+                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                    : credits.warning === 'critical'
+                      ? 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30'
+                      : credits.warning === 'low'
+                        ? 'bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+                        : 'bg-neutral-800/50 text-neutral-400 hover:bg-neutral-800'
+                )}
+              >
+                <Zap className={cn(
+                  'w-4 h-4 flex-shrink-0',
+                  credits.warning === 'depleted' ? 'text-red-400' :
+                  credits.warning === 'critical' ? 'text-amber-400' :
+                  credits.warning === 'low' ? 'text-amber-300' :
+                  'text-emerald-400'
+                )} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium">Credits</span>
+                    <span className="text-xs font-bold">
+                      {creditsLoading ? '...' : credits.remaining}
+                    </span>
+                  </div>
+                  {/* Progress bar */}
+                  {!creditsLoading && (credits.monthly > 0 || credits.purchased > 0) && (
+                    <div className="mt-1 h-1 rounded-full bg-neutral-700 overflow-hidden">
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all duration-500',
+                          credits.warning === 'depleted' ? 'bg-red-500' :
+                          credits.warning === 'critical' ? 'bg-amber-500' :
+                          credits.warning === 'low' ? 'bg-amber-400' :
+                          'bg-emerald-500'
+                        )}
+                        style={{
+                          width: `${Math.min(100, (credits.remaining / Math.max(1, credits.monthly + credits.purchased)) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </Link>
+            )}
+          </div>
+        )}
 
         {/* Bottom section */}
         <div className="p-3 border-t border-neutral-800 space-y-1">

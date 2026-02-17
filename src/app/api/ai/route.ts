@@ -10,12 +10,15 @@ import {
   type AppData,
 } from '@/lib/ai';
 import { authenticateRequest, isAuthError } from '@/lib/api-auth';
+import { deductCredit, CreditExhaustedError, getServerCredits, getCreditWarningLevel } from '@/lib/credits-server';
+import { rateLimit, getAiRateLimit, rateLimitHeaders, type PlanTier } from '@/lib/rate-limit';
+import { createFeedEvent } from '@/lib/feed-server';
 
 // POST /api/ai
 // Body: { task: string, ...params }
 export async function POST(req: NextRequest) {
   try {
-    // Verify authentication
+    // ── Layer 0: Authentication ─────────────────────────────────
     const auth = await authenticateRequest(req);
     if (isAuthError(auth)) return auth;
 
@@ -27,9 +30,65 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ── Layer 1: Rate Limiting ──────────────────────────────────
+    const credits = await getServerCredits(auth.user.id);
+    const plan = (credits.plan || 'free') as PlanTier;
+    const rlConfig = getAiRateLimit(plan);
+    const rlResult = await rateLimit(auth.user.id, rlConfig);
+
+    if (!rlResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded. Please slow down.',
+          retryAfter: Math.ceil((rlResult.reset - Date.now()) / 1000),
+        },
+        {
+          status: 429,
+          headers: rateLimitHeaders(rlResult),
+        }
+      );
+    }
+
+    // ── Layer 2: Parse + validate BEFORE deducting credits ──────
     const body = await req.json();
     const { task, brandVoice, ...params } = body;
 
+    if (!task) {
+      return NextResponse.json({ error: 'Missing "task" field' }, { status: 400 });
+    }
+
+    const KNOWN_TASKS = [
+      'generate-copy', 'brainstorm-hooks', 'analyze-reviews', 'suggest-keywords',
+      'analyze-competitor', 'simulate-keywords', 'dashboard-audit', 'suggest-influencers',
+      'generate-launch-content', 'suggest-slide-styles', 'generate-hashtags', 'generate-briefing', 'freeform',
+    ];
+    if (!KNOWN_TASKS.includes(task)) {
+      return NextResponse.json({ error: `Unknown task: ${task}` }, { status: 400 });
+    }
+
+    // ── Layer 3: Credit Check + Deduction ───────────────────────
+    let creditInfo;
+    try {
+      creditInfo = await deductCredit(auth.user.id, 'AI generation');
+    } catch (error) {
+      if (error instanceof CreditExhaustedError) {
+        return NextResponse.json(
+          {
+            error: 'No credits remaining',
+            plan: error.plan,
+            nextReset: error.nextReset,
+            upgradeUrl: '/pricing',
+            message: error.plan === 'free'
+              ? 'You\'ve used all your free credits. Upgrade to Pro for 30 credits/month.'
+              : `Your monthly credits are depleted. Credits reset on ${new Date(error.nextReset).toLocaleDateString()}. You can also buy credit packs.`,
+          },
+          { status: 402 }
+        );
+      }
+      throw error;
+    }
+
+    // ── Layer 4: Process the AI request ─────────────────────────
     // Build brand voice system prompt addition for creative tasks
     const CREATIVE_TASKS = ['generate-copy', 'brainstorm-hooks', 'analyze-reviews', 'freeform', 'generate-launch-content', 'suggest-slide-styles', 'generate-hashtags'];
     let brandVoicePrompt = '';
@@ -173,11 +232,9 @@ Return a JSON array of strings (without # prefix). Mix popular broad hashtags (l
         break;
       }
 
+      // default case handled by KNOWN_TASKS validation above
       default:
-        return NextResponse.json(
-          { error: `Unknown task: ${task}` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `Unknown task: ${task}` }, { status: 400 });
     }
 
     // Try to parse as JSON if the AI returned JSON
@@ -195,7 +252,39 @@ Return a JSON array of strings (without # prefix). Mix popular broad hashtags (l
       parsed = result;
     }
 
-    return NextResponse.json({ result: parsed });
+    // Fire-and-forget feed event for notable tasks
+    const FEED_TASKS: Record<string, { type: string; title: string }> = {
+      'dashboard-audit': { type: 'content', title: 'Dashboard audit completed' },
+      'analyze-reviews': { type: 'review', title: 'Reviews analyzed with AI' },
+      'analyze-competitor': { type: 'competitor', title: 'Competitor analyzed' },
+      'generate-copy': { type: 'content', title: 'Marketing copy generated' },
+      'brainstorm-hooks': { type: 'tiktok', title: 'TikTok hooks brainstormed' },
+      'generate-launch-content': { type: 'launch', title: 'Launch content generated' },
+    };
+    const feedMeta = FEED_TASKS[task];
+    if (feedMeta) {
+      createFeedEvent({
+        user_id: auth.user.id,
+        type: feedMeta.type as 'keyword' | 'competitor' | 'content' | 'review' | 'tiktok' | 'launch',
+        title: feedMeta.title,
+        summary: `${feedMeta.title} for ${body.appData?.name || 'your app'}.`,
+      }).catch(() => {}); // fire-and-forget
+    }
+
+    // ── Layer 4: Return result with credit info ─────────────────
+    const warningLevel = getCreditWarningLevel(creditInfo);
+
+    return NextResponse.json({
+      result: parsed,
+      credits: {
+        remaining: creditInfo.remaining,
+        monthly: creditInfo.monthly,
+        purchased: creditInfo.purchased,
+        used: creditInfo.used,
+        plan: creditInfo.plan,
+        warning: warningLevel,
+      },
+    });
   } catch (error: unknown) {
     console.error('AI API error:', error);
     const message = error instanceof Error ? error.message : 'AI generation failed';

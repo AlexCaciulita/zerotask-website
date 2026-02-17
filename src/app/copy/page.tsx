@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
-import { Copy, RefreshCw, Download, Apple, Play, Search, Target, Facebook, Music, MessageCircle, Rocket, Check, Sparkles, ChevronDown, FileText } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Copy, RefreshCw, Download, Apple, Play, Search, Target, Facebook, Music, MessageCircle, Rocket, Check, Sparkles, ChevronDown, FileText, PenTool } from 'lucide-react';
 import clsx from 'clsx';
 import { getBrandVoice } from '@/lib/brand-voice';
 import { useActiveApp } from '@/lib/useActiveApp';
 import { apiFetch } from '@/lib/api-client';
+import EmptyState from '@/components/EmptyState';
 
 type Voice = 'Professional' | 'Casual' | 'Playful' | 'Luxury';
 type Platform = typeof PLATFORMS[number]['id'];
@@ -68,54 +69,6 @@ const PLATFORM_FIELDS: Record<string, Field[]> = {
   ],
 };
 
-const COPY_DATA: Record<string, Record<Voice, string[][]>> = {
-  appstore: {
-    Professional: [
-      ['My App — Smart Productivity Tool', 'Get More Done, Effortlessly', 'The AI-powered assistant that helps you work smarter, not harder.', 'My App uses cutting-edge AI to streamline your workflow. Get smart suggestions, automated tasks, and intelligent insights that actually save time. Trusted by 500K+ users.', 'productivity app,ai assistant,task manager,workflow helper,smart planner'],
-      ['My App: Smart Workflow Assistant', 'AI-Powered Task Management', 'Your AI assistant for everyday productivity.', 'Elevate your daily workflow with AI-driven suggestions. From quick actions to smart replies, My App helps you manage tasks efficiently.', 'productivity tool,smart tasks,ai helper,workflow writer,task manager'],
-      ['My App — AI Task Helper', 'Better Workflow, More Results', 'The intelligent assistant that manages your tasks.', 'My App combines advanced AI with your personal style. Get task suggestions, workflow ideas, and smart actions — all tailored to your needs.', 'task helper,workflow manager,ai assistant,smart replies'],
-    ],
-    Casual: [
-      ['My App — AI Productivity Assistant', 'Stop Wasting Time on Busywork ✨', 'Your daily workflow is about to get a serious upgrade. Just saying.', 'Ever stare at your screen for 20 min trying to organize your day? Same. That\'s why we built My App — set your goals, let AI do its thing, and boom. Tasks handled.', 'productivity app,easy tasks,quick actions,ai magic,workflow helper'],
-      ['My App: Work Smarter', 'No More Overwhelming To-Do Lists, Seriously', 'The easiest way to manage your tasks and projects. You\'re welcome.', 'Look, we get it — managing tasks shouldn\'t feel like homework. My App makes it stupid simple. AI suggestions? One tap. Task sorting? Done. Your productivity will speak for itself.', 'simple tasks,easy workflow,task helper,project manager,no stress'],
-      ['My App — AI Task Assistant', 'Plan. Automate. Accomplish. That Simple.', 'Finally, a task assistant that doesn\'t make your workflow feel robotic.', 'We took all the stress out of productivity and replaced it with AI that works like you. Smart tasks, great suggestions, more free time — all without the overwhelm.', 'task assistant,ai productivity,workflow helper,smart planner,quick tasks'],
-    ],
-    Playful: [
-      ['My App — AI Productivity Wizard', 'Your To-Do List Called. It Wants a Glow Up 💅', 'Warning: Side effects include excessive free time.', 'Meet your new secret weapon for getting things done! 💪 My App\'s AI is basically a personal assistant living in your phone. Wave goodbye to overwhelm, hello to smooth workflows. Productivity not included (but basically). ', 'productivity wizard,task glow up,fun workflow,ai helper,smart tasks'],
-      ['My App: Glow Up Your Workflow', 'Making Boring To-Dos Extinct 🦕', 'Your daily tasks are about to have a serious glow-up moment.', 'Ready to manage tasks so well your boss thinks you hired a team? My App\'s AI understands vibes. Focused? Creative? Chill? Just pick a mode and watch the magic happen ✨', 'glow up,vibe tasks,workflow magic,task glow,fun planning'],
-      ['My App — Task Wizardry', 'Abracadabra, Your Tasks Are Done 🔥', 'Actual sorcery for your daily workflow. We don\'t make the rules.', 'Why spend hours managing tasks when AI can organize everything in seconds? My App turns your chaotic to-do into streamlined workflows faster than you can say hello 🚀 Smart tasks, smooth days, real results.', 'task wizard,magic workflow,instant planning,fun productivity,goals fly'],
-    ],
-    Luxury: [
-      ['My App — AI Workflow Artisan', 'Where Intelligence Meets Efficiency', 'Where artificial intelligence meets authentic productivity.', 'My App represents the pinnacle of modern task management. Our proprietary AI models, trained on millions of successful workflows, craft plans that meet the exacting standards of discerning professionals. Every action is curated.', 'luxury assistant,premium productivity,artistry ai,professional planning,elite'],
-      ['My App: Premier Task Management', 'Refined Efficiency, Unmatched Quality', 'The discerning professional\'s essential productivity companion.', 'Crafted for those who accept nothing less than exceptional results. My App\'s AI understands the subtle nuances of workflow that separate top performers from the average.', 'premier productivity,refined workflow,exceptional quality,discerning,elite'],
-      ['My App — Masterclass Productivity', 'Excellence in Every Task', 'Curated AI technology for the most sophisticated professionals.', 'Experience productivity reimagined through the lens of excellence. My App delivers museum-quality workflow management with the precision of a master planner. Your time deserves nothing less.', 'masterclass,elite productivity,sophisticated,precision planning,excellence'],
-    ],
-  },
-};
-
-function generatePlatformCopy(platform: string, voice: Voice, fields: Field[]): string[][] {
-  const tones: Record<Voice, string> = {
-    Professional: 'professional',
-    Casual: 'casual and friendly',
-    Playful: 'fun and energetic',
-    Luxury: 'premium and sophisticated',
-  };
-  
-  return [0, 1, 2].map(variation => 
-    fields.map(f => {
-      const base = {
-        Professional: [`My App: AI-Powered Productivity Assistant${variation > 0 ? ` — variation ${variation + 1}` : ''}`, `Work smarter with intelligent task management`, `Smart suggestions, automated workflows, and time-saving tools. Used by 500K+ professionals.`],
-        Casual: [`My App handles your busywork${variation > 0 ? ` ✌️ v${variation + 1}` : ' ✌️'}`, `Never waste time on repetitive tasks again`, `One tap and boom — done. AI automation, smart templates, faster workflows. No effort needed.`],
-        Playful: [`My App = productivity sorcery 🪄${variation > 0 ? ` (take ${variation + 1})` : ''}`, `Your workflow is about to have a glow-up moment 💅`, `Warning: Your coworkers will think you're superhuman. AI-powered task magic that turns chaos into calm ✨`],
-        Luxury: [`My App — Where Intelligence Meets Efficiency${variation > 0 ? ` (Edition ${variation + 1})` : ''}`, `Refined productivity for the discerning professional`, `Elite AI-crafted workflows. For those who accept nothing less than exceptional results.`],
-      };
-      const texts = base[voice];
-      const idx = fields.indexOf(f) % texts.length;
-      return texts[idx].slice(0, f.limit + 50);
-    })
-  );
-}
-
 function charCountColor(len: number, limit: number): string {
   const ratio = len / limit;
   if (ratio >= 1) return 'text-red-500';
@@ -145,6 +98,30 @@ export default function CopyPage() {
   const [regenLoading, setRegenLoading] = useState<number | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
+
+  // Load cached copy from localStorage on mount
+  useEffect(() => {
+    const cached: Record<string, string[][]> = {};
+    for (const p of PLATFORMS) {
+      for (const v of VOICES) {
+        const key = `zerotask-copy-${p.id}-${v}`;
+        try {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              cached[`${p.id}-${v}`] = parsed;
+            }
+          }
+        } catch {
+          // ignore corrupt cache entries
+        }
+      }
+    }
+    if (Object.keys(cached).length > 0) {
+      setVariations(cached);
+    }
+  }, []);
 
   const generateWithAI = useCallback(async () => {
     setAiLoading(true);
@@ -179,6 +156,11 @@ export default function CopyPage() {
       if (parsed.length > 0) {
         const key = `${platform}-${voice}`;
         setVariations(prev => ({ ...prev, [key]: parsed }));
+        try {
+          localStorage.setItem(`zerotask-copy-${platform}-${voice}`, JSON.stringify(parsed));
+        } catch {
+          // ignore storage errors
+        }
       }
     } catch (err: unknown) {
       setAiError(err instanceof Error ? err.message : 'AI generation failed');
@@ -213,6 +195,11 @@ export default function CopyPage() {
         const current = [...getVariations().map(v => [...v])];
         current[varIdx] = vals;
         setVariations(prev => ({ ...prev, [key]: current }));
+        try {
+          localStorage.setItem(`zerotask-copy-${platform}-${voice}`, JSON.stringify(current));
+        } catch {
+          // ignore storage errors
+        }
       }
     } catch {
       // silent fail for single regen
@@ -226,8 +213,7 @@ export default function CopyPage() {
   const getVariations = (): string[][] => {
     const key = `${platform}-${voice}`;
     if (variations[key]) return variations[key];
-    if (platform === 'appstore' && COPY_DATA.appstore[voice]) return COPY_DATA.appstore[voice];
-    return generatePlatformCopy(platform, voice, fields);
+    return [];
   };
 
   const currentVariations = getVariations();
@@ -237,6 +223,11 @@ export default function CopyPage() {
     const current = [...getVariations().map(v => [...v])];
     current[varIdx][fieldIdx] = value;
     setVariations(prev => ({ ...prev, [key]: current }));
+    try {
+      localStorage.setItem(`zerotask-copy-${platform}-${voice}`, JSON.stringify(current));
+    } catch {
+      // ignore storage errors
+    }
   };
 
   const handleCopy = (text: string, id: string) => {
@@ -332,6 +323,15 @@ export default function CopyPage() {
       </div>
 
       {/* Variation Cards */}
+      {currentVariations.length === 0 ? (
+        <EmptyState
+          icon={PenTool}
+          title="No copy generated"
+          description="Click Generate to create optimized copy for this platform using AI."
+          actionLabel="Generate Copy"
+          onAction={generateWithAI}
+        />
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {currentVariations.map((variation, vi) => (
           <div key={vi} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden">
@@ -389,6 +389,7 @@ export default function CopyPage() {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import { getUsageToday, canGenerate, incrementUsage } from '@/lib/usage';
 import { apiFetch } from '@/lib/api-client';
 import UsageMeter from '@/components/UsageMeter';
 import BuyCreditsModal from '@/components/BuyCreditsModal';
+import EmptyState from '@/components/EmptyState';
 
 // --- Tabs ---
 const TABS = ['Hooks', 'Slideshow', 'Calendar', 'Performance', 'What If'] as const;
@@ -77,19 +78,6 @@ const FORMULAS = [
 const FORMULA_COLORS = ['border-l-blue-500', 'border-l-violet-500', 'border-l-amber-500', 'border-l-rose-500', 'border-l-emerald-500'];
 const FORMULA_BG = ['bg-blue-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500', 'bg-emerald-500'];
 
-const HOOKS = [
-  { id: 1, text: "My boss said I'm terrible at time management until I showed her this AI app", formula: 0, rating: 0, fav: false },
-  { id: 2, text: "My coworker said my to-do lists were chaos until I started using this app", formula: 0, rating: 0, fav: false },
-  { id: 3, text: "My friend saw my schedule and said I need professional help. So I got AI help", formula: 0, rating: 0, fav: false },
-  { id: 4, text: "POV: You just discovered an AI that organizes your entire day for you", formula: 1, rating: 0, fav: false },
-  { id: 5, text: "POV: Your productivity goes from 30% to 95% overnight", formula: 1, rating: 0, fav: false },
-  { id: 6, text: "I used to miss every deadline. Then I found this app.", formula: 2, rating: 0, fav: false },
-  { id: 7, text: "I used sticky notes for 6 months. Then AI planned my day for me.", formula: 2, rating: 0, fav: false },
-  { id: 8, text: "Stop writing your to-do list manually. Do this instead", formula: 3, rating: 0, fav: false },
-  { id: 9, text: "Day 7 of using AI to plan my tasks — my output went from 3 to 12 tasks per day", formula: 4, rating: 0, fav: false },
-  { id: 10, text: "Day 30 of letting AI manage my schedule — I got promoted", formula: 4, rating: 0, fav: false },
-];
-
 // --- Calendar Data ---
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const COMMON_TIMES = ['6:00 AM','7:00 AM','8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM','9:00 PM'];
@@ -148,38 +136,8 @@ const STATUS_BORDER = {
   Posted: 'border-l-emerald-400 dark:border-l-emerald-500',
 };
 
-// --- Performance Data ---
-const PERF_POSTS = [
-  { id: 1, title: 'Boss was SHOCKED by my productivity', views: 234200, likes: 18400, shares: 4200, comments: 890, formula: 'Person + Conflict', date: 'Feb 1' },
-  { id: 2, title: 'POV: AI plans your entire workday', views: 142000, likes: 11200, shares: 2800, comments: 620, formula: 'POV Discovery', date: 'Feb 3' },
-  { id: 3, title: 'Missed every deadline then found this app', views: 108000, likes: 8900, shares: 2100, comments: 480, formula: 'Competitor Switch', date: 'Feb 5' },
-  { id: 4, title: 'Day 30 using AI for task management', views: 9800, likes: 720, shares: 180, comments: 45, formula: 'Day N Journey', date: 'Feb 6' },
-  { id: 5, title: 'Stop using sticky notes for tasks', views: 8400, likes: 610, shares: 150, comments: 38, formula: 'Stop + Do This', date: 'Feb 7' },
-  { id: 6, title: 'My team saw my AI-planned schedule', views: 7200, likes: 540, shares: 120, comments: 32, formula: 'Person + Conflict', date: 'Feb 8' },
-  { id: 7, title: 'Schedule glow-up before vs after AI', views: 6100, likes: 450, shares: 95, comments: 28, formula: 'Before/After', date: 'Feb 9' },
-  { id: 8, title: 'Best AI productivity hacks for work', views: 5300, likes: 380, shares: 82, comments: 22, formula: 'Tutorial', date: 'Feb 10' },
-  { id: 9, title: 'Finished my tasks in 2 hours with AI', views: 4800, likes: 340, shares: 70, comments: 18, formula: 'Speed Demo', date: 'Feb 11' },
-  { id: 10, title: 'Procrastinator productivity hack with AI', views: 3900, likes: 280, shares: 55, comments: 15, formula: 'Day N Journey', date: 'Feb 12' },
-  { id: 11, title: 'My workflow before vs after AI', views: 3200, likes: 230, shares: 48, comments: 12, formula: 'Before/After', date: 'Jan 28' },
-  { id: 12, title: 'AI planner vs manual planning', views: 2800, likes: 200, shares: 40, comments: 10, formula: 'Competitor Switch', date: 'Jan 29' },
-  { id: 13, title: 'AI planning templates that work', views: 2100, likes: 150, shares: 32, comments: 8, formula: 'Tutorial', date: 'Jan 30' },
-  { id: 14, title: 'Remote work productivity with AI help', views: 1800, likes: 130, shares: 25, comments: 6, formula: 'Before/After', date: 'Jan 31' },
-  { id: 15, title: 'AI task suggestions tutorial', views: 1200, likes: 90, shares: 18, comments: 4, formula: 'Tutorial', date: 'Jan 27' },
-];
-
-const FORMULA_STATS = [
-  { formula: 'Person + Conflict', avgViews: 120700, count: 2 },
-  { formula: 'POV Discovery', avgViews: 142000, count: 1 },
-  { formula: 'Competitor Switch', avgViews: 55400, count: 2 },
-  { formula: 'Day N Journey', avgViews: 6850, count: 2 },
-  { formula: 'Before/After', avgViews: 4367, count: 3 },
-  { formula: 'Tutorial', avgViews: 3100, count: 3 },
-];
-
 const SLIDE_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 const CHART_GRADIENT_ID = 'viewsGradient';
-
-const maxFormulaViews = Math.max(...FORMULA_STATS.map(f => f.avgViews));
 
 const Spinner = () => <div className="animate-spin rounded-full h-4 w-4 border-2 border-emerald-500 border-t-transparent" />;
 
@@ -294,7 +252,7 @@ export default function TikTokPage() {
   const canGen = canGenerate(plan);
   const getActiveAppData = () => ({ name: app?.name || 'App', category: app?.category || 'General', platform: app?.platform?.toLowerCase() || 'ios', description: app?.description || '' });
   const [tab, setTab] = useState<Tab>('Hooks');
-  const [hooks, setHooks] = useState(HOOKS);
+  const [hooks, setHooks] = useState<{ id: number; text: string; formula: number; rating: number; fav: boolean }[]>([]);
   const [hooksLoading, setHooksLoading] = useState(false);
   const [hooksError, setHooksError] = useState<string | null>(null);
   const [hoveredStar, setHoveredStar] = useState<{ id: number; star: number } | null>(null);
@@ -321,6 +279,55 @@ export default function TikTokPage() {
   const [showConnectionModal, setShowConnectionModal] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [showBuyCredits, setShowBuyCredits] = useState(false);
+
+  // Performance data from DB (published posts with metrics)
+  type PerfPost = { id: string; title: string; views: number; likes: number; shares: number; comments: number; formula: string; date: string };
+  const [perfPosts, setPerfPosts] = useState<PerfPost[]>([]);
+
+  // Computed formula stats from perfPosts
+  const formulaStats = (() => {
+    const map: Record<string, { totalViews: number; count: number }> = {};
+    for (const p of perfPosts) {
+      if (!map[p.formula]) map[p.formula] = { totalViews: 0, count: 0 };
+      map[p.formula].totalViews += p.views;
+      map[p.formula].count += 1;
+    }
+    return Object.entries(map).map(([formula, { totalViews, count }]) => ({
+      formula,
+      avgViews: Math.round(totalViews / count),
+      count,
+    }));
+  })();
+  const maxFormulaViews = formulaStats.length > 0 ? Math.max(...formulaStats.map(f => f.avgViews)) : 1;
+
+  // Load performance posts from DB on mount
+  useEffect(() => {
+    const appId = app?.id || 'default';
+    async function loadPerfPosts() {
+      try {
+        const posts = await getTikTokPosts(appId);
+        if (posts && posts.length > 0) {
+          const published = posts
+            .filter((p: Record<string, unknown>) => p.status === 'Posted' || p.status === 'published')
+            .filter((p: Record<string, unknown>) => p.views || p.likes || p.shares)
+            .map((p: Record<string, unknown>) => ({
+              id: p.id as string,
+              title: (p.title as string) || (p.hook as string) || '',
+              views: (p.views as number) || 0,
+              likes: (p.likes as number) || 0,
+              shares: (p.shares as number) || 0,
+              comments: (p.comments as number) || 0,
+              formula: (p.formula as string) || 'Other',
+              date: p.scheduled_date ? new Date(p.scheduled_date as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '',
+            }));
+          setPerfPosts(published);
+        }
+      } catch (e) {
+        console.warn('Failed to load performance posts from DB', e);
+      }
+    }
+    loadPerfPosts();
+  }, []);
 
   // Refresh usage when plan changes
   useEffect(() => {
@@ -382,7 +389,7 @@ export default function TikTokPage() {
 
   useEffect(() => {
     setCalendarData(loadCalendar());
-    const appId = typeof window !== 'undefined' ? (localStorage.getItem('zerotask-active-app') || 'default') : 'default';
+    const appId = app?.id || 'default';
     async function loadFromDb() {
       try {
         const posts = await getTikTokPosts(appId);
@@ -439,7 +446,7 @@ export default function TikTokPage() {
 
   const savePost = async () => {
     if (!editingPost || !formTitle.trim()) return;
-    const appId = typeof window !== 'undefined' ? (localStorage.getItem('zerotask-active-app') || 'default') : 'default';
+    const appId = app?.id || 'default';
     if (editingPost.post) {
       updateCalendar(posts => posts.map(p => p.id === editingPost.post!.id ? { ...p, title: formTitle, time: formTime, status: formStatus } : p));
       updateTikTokPost(editingPost.post.id, { title: formTitle, status: formStatus, scheduled_time: formTime }).catch(() => {});
@@ -703,7 +710,7 @@ export default function TikTokPage() {
 
   const projectedReach = Math.round(frequency * 30 * 8500 * (1 + (frequency - 1) * 0.15));
 
-  const chartData = PERF_POSTS.map(p => ({ name: p.date, views: p.views })).reverse();
+  const chartData = perfPosts.map(p => ({ name: p.date, views: p.views })).reverse();
 
   const addHashtag = () => {
     const tag = newHashtag.replace(/^#/, '').trim();
@@ -785,61 +792,73 @@ export default function TikTokPage() {
             {hooksError && <span className="text-sm text-red-500">{hooksError}</span>}
           </div>
 
-          {/* Formula pills */}
-          <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
-            <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">Formula Template</div>
-            <div ref={formulaScrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-              {FORMULAS.map((f, i) => (
-                <button key={i} onClick={() => setSelectedFormula(i)} className={clsx(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 whitespace-nowrap shrink-0 border',
-                  selectedFormula === i
-                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
-                    : 'border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-600'
-                )}>
-                  <span className={clsx('w-2 h-2 rounded-full shrink-0', FORMULA_BG[i])} />
-                  {f}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Hook cards */}
-          <div className="space-y-2">
-            {hooks.filter(h => h.formula === selectedFormula).map(h => (
-              <div key={h.id} className={clsx(
-                'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg border-l-[3px] p-4 flex items-center gap-4 hover:shadow-sm transition-all duration-150',
-                FORMULA_COLORS[h.formula] || 'border-l-neutral-300'
-              )}>
-                <button onClick={() => toggleFav(h.id)} className={clsx('shrink-0 transition-colors duration-150', h.fav ? 'text-red-500' : 'text-neutral-300 dark:text-neutral-600 hover:text-red-400')}>
-                  <Heart className="w-4 h-4" fill={h.fav ? 'currentColor' : 'none'} />
-                </button>
-                <div className="flex-1 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed">&ldquo;{h.text}&rdquo;</div>
-                <button onClick={() => useHookForSlideshow(h.text)} className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-150 border border-violet-200 dark:border-violet-800">
-                  <Film className="w-3 h-3" /> Slideshow
-                </button>
-                <div className="flex gap-0.5 shrink-0">
-                  {[1, 2, 3, 4, 5].map(s => {
-                    const isHovered = hoveredStar?.id === h.id && s <= hoveredStar.star;
-                    const isFilled = s <= h.rating;
-                    return (
-                      <button
-                        key={s}
-                        onClick={() => rateHook(h.id, s)}
-                        onMouseEnter={() => setHoveredStar({ id: h.id, star: s })}
-                        onMouseLeave={() => setHoveredStar(null)}
-                        className={clsx(
-                          'transition-all duration-100 p-0.5',
-                          isHovered || isFilled ? 'text-amber-400 scale-110' : 'text-neutral-200 dark:text-neutral-700 hover:text-amber-300'
-                        )}
-                      >
-                        <Star className="w-3.5 h-3.5" fill={(isHovered || isFilled) ? 'currentColor' : 'none'} />
-                      </button>
-                    );
-                  })}
+          {hooks.length === 0 ? (
+            <EmptyState
+              icon={Film}
+              title="No hooks generated yet"
+              description="Use AI to brainstorm viral hooks for your app's TikTok content."
+              actionLabel="Generate Hooks"
+              onAction={generateHooks}
+            />
+          ) : (
+            <>
+              {/* Formula pills */}
+              <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+                <div className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">Formula Template</div>
+                <div ref={formulaScrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  {FORMULAS.map((f, i) => (
+                    <button key={i} onClick={() => setSelectedFormula(i)} className={clsx(
+                      'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 whitespace-nowrap shrink-0 border',
+                      selectedFormula === i
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400'
+                        : 'border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-600'
+                    )}>
+                      <span className={clsx('w-2 h-2 rounded-full shrink-0', FORMULA_BG[i])} />
+                      {f}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* Hook cards */}
+              <div className="space-y-2">
+                {hooks.filter(h => h.formula === selectedFormula).map(h => (
+                  <div key={h.id} className={clsx(
+                    'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg border-l-[3px] p-4 flex items-center gap-4 hover:shadow-sm transition-all duration-150',
+                    FORMULA_COLORS[h.formula] || 'border-l-neutral-300'
+                  )}>
+                    <button onClick={() => toggleFav(h.id)} className={clsx('shrink-0 transition-colors duration-150', h.fav ? 'text-red-500' : 'text-neutral-300 dark:text-neutral-600 hover:text-red-400')}>
+                      <Heart className="w-4 h-4" fill={h.fav ? 'currentColor' : 'none'} />
+                    </button>
+                    <div className="flex-1 text-sm text-neutral-800 dark:text-neutral-200 leading-relaxed">&ldquo;{h.text}&rdquo;</div>
+                    <button onClick={() => useHookForSlideshow(h.text)} className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-150 border border-violet-200 dark:border-violet-800">
+                      <Film className="w-3 h-3" /> Slideshow
+                    </button>
+                    <div className="flex gap-0.5 shrink-0">
+                      {[1, 2, 3, 4, 5].map(s => {
+                        const isHovered = hoveredStar?.id === h.id && s <= hoveredStar.star;
+                        const isFilled = s <= h.rating;
+                        return (
+                          <button
+                            key={s}
+                            onClick={() => rateHook(h.id, s)}
+                            onMouseEnter={() => setHoveredStar({ id: h.id, star: s })}
+                            onMouseLeave={() => setHoveredStar(null)}
+                            className={clsx(
+                              'transition-all duration-100 p-0.5',
+                              isHovered || isFilled ? 'text-amber-400 scale-110' : 'text-neutral-200 dark:text-neutral-700 hover:text-amber-300'
+                            )}
+                          >
+                            <Star className="w-3.5 h-3.5" fill={(isHovered || isFilled) ? 'currentColor' : 'none'} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -1117,78 +1136,90 @@ export default function TikTokPage() {
       {/* Performance Tab */}
       {tab === 'Performance' && (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5">
-            <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">Views Over Time</div>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
-                  <defs>
-                    <linearGradient id={CHART_GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.3} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} vertical={false} />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    formatter={(v) => typeof v === 'number' ? v.toLocaleString() : v}
-                    contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '12px', padding: '8px 12px' }}
-                    itemStyle={{ color: '#fff' }}
-                    labelStyle={{ color: '#94a3b8', fontSize: '11px' }}
-                    cursor={{ fill: 'rgba(0,0,0,0.04)' }}
-                  />
-                  <Bar dataKey="views" fill={`url(#${CHART_GRADIENT_ID})`} radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            {FORMULA_STATS.map(f => (
-              <div key={f.formula} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4">
-                <div className="text-xs text-neutral-400 font-medium">{f.formula}</div>
-                <div className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mt-1 tabular-nums">{(f.avgViews / 1000).toFixed(1)}K <span className="text-xs font-normal text-neutral-400">avg views</span></div>
-                <div className="text-xs text-neutral-500 mb-2">{f.count} posts</div>
-                <div className="h-1 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                    style={{ width: `${(f.avgViews / maxFormulaViews) * 100}%` }}
-                  />
+          {perfPosts.length === 0 ? (
+            <EmptyState
+              icon={BarChart3}
+              title="No performance data yet"
+              description="Publish TikTok posts and track their performance here. Posts with views, likes, and shares will appear automatically."
+            />
+          ) : (
+            <>
+              <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5">
+                <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">Views Over Time</div>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <defs>
+                        <linearGradient id={CHART_GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
+                          <stop offset="100%" stopColor="#10b981" stopOpacity={0.3} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        formatter={(v) => typeof v === 'number' ? v.toLocaleString() : v}
+                        contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '8px', color: '#fff', fontSize: '12px', padding: '8px 12px' }}
+                        itemStyle={{ color: '#fff' }}
+                        labelStyle={{ color: '#94a3b8', fontSize: '11px' }}
+                        cursor={{ fill: 'rgba(0,0,0,0.04)' }}
+                      />
+                      <Bar dataKey="views" fill={`url(#${CHART_GRADIENT_ID})`} radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-            ))}
-          </div>
 
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10">
-                  <tr className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/95 dark:bg-neutral-900/95 backdrop-blur-sm">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Post</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Views</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Likes</th>
-                    <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Shares</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Formula</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {PERF_POSTS.map((p, idx) => (
-                    <tr key={p.id} className={clsx(
-                      'border-b border-neutral-100 dark:border-neutral-800/50 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/40 transition-colors duration-100 cursor-pointer',
-                      idx % 2 === 1 && 'bg-neutral-50/50 dark:bg-neutral-800/10'
-                    )}>
-                      <td className="px-4 py-3 text-neutral-800 dark:text-neutral-200 font-medium">{p.title}</td>
-                      <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400 tabular-nums">{p.views.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400 tabular-nums">{p.likes.toLocaleString()}</td>
-                      <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400 tabular-nums">{p.shares.toLocaleString()}</td>
-                      <td className="px-4 py-3"><span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">{p.formula}</span></td>
-                    </tr>
+              {formulaStats.length > 0 && (
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                  {formulaStats.map(f => (
+                    <div key={f.formula} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4">
+                      <div className="text-xs text-neutral-400 font-medium">{f.formula}</div>
+                      <div className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mt-1 tabular-nums">{(f.avgViews / 1000).toFixed(1)}K <span className="text-xs font-normal text-neutral-400">avg views</span></div>
+                      <div className="text-xs text-neutral-500 mb-2">{f.count} posts</div>
+                      <div className="h-1 bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                          style={{ width: `${(f.avgViews / maxFormulaViews) * 100}%` }}
+                        />
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </div>
+              )}
+
+              <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead className="sticky top-0 z-10">
+                      <tr className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/95 dark:bg-neutral-900/95 backdrop-blur-sm">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Post</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Views</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Likes</th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">Shares</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Formula</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {perfPosts.map((p, idx) => (
+                        <tr key={p.id} className={clsx(
+                          'border-b border-neutral-100 dark:border-neutral-800/50 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/40 transition-colors duration-100 cursor-pointer',
+                          idx % 2 === 1 && 'bg-neutral-50/50 dark:bg-neutral-800/10'
+                        )}>
+                          <td className="px-4 py-3 text-neutral-800 dark:text-neutral-200 font-medium">{p.title}</td>
+                          <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400 tabular-nums">{p.views.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400 tabular-nums">{p.likes.toLocaleString()}</td>
+                          <td className="px-4 py-3 text-right text-neutral-600 dark:text-neutral-400 tabular-nums">{p.shares.toLocaleString()}</td>
+                          <td className="px-4 py-3"><span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">{p.formula}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 

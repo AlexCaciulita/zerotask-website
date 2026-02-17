@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { TrendingUp, Download, DollarSign, Star, Hash, Loader2, Check, X, Search, PenTool, Film, BarChart3, MessageSquare, CloudOff, RefreshCw } from 'lucide-react';
+import { TrendingUp, Download, DollarSign, Star, Hash, Loader2, Check, X, Search, PenTool, Film, BarChart3, MessageSquare, CloudOff, RefreshCw, Inbox, Sunrise } from 'lucide-react';
 import { useActiveApp } from '@/lib/useActiveApp';
 import GrowthScore from '@/components/GrowthScore';
 import FeedCard, { FeedItem } from '@/components/FeedCard';
 import PageHeader from '@/components/PageHeader';
+import EmptyState from '@/components/EmptyState';
 import { useToast } from '@/components/Toast';
 import { apiFetch } from '@/lib/api-client';
+import { useDashboard } from '@/lib/useDashboard';
+import { useBriefing } from '@/lib/useBriefing';
 
 const STORAGE_KEY = 'zerotask-dashboard-feed';
 const STORAGE_KEY_AUDIT_TIME = 'zerotask-dashboard-audit-time';
@@ -29,10 +32,15 @@ interface StatValues {
   keywordsPrev: string;
 }
 
+const emptyStatValues: StatValues = {
+  downloads: '0', downloadsPrev: '0', revenue: '0', revenuePrev: '0',
+  rating: '0', ratingPrev: '0', keywords: '0', keywordsPrev: '0',
+};
+
 const defaultStatValues: Record<Period, StatValues> = {
-  week: { downloads: '2847', downloadsPrev: '2541', revenue: '4291', revenuePrev: '3973', rating: '4.2', ratingPrev: '4.3', keywords: '147', keywordsPrev: '124' },
-  month: { downloads: '11280', downloadsPrev: '9800', revenue: '17100', revenuePrev: '15200', rating: '4.2', ratingPrev: '4.1', keywords: '147', keywordsPrev: '112' },
-  all: { downloads: '89400', downloadsPrev: '78000', revenue: '134500', revenuePrev: '118000', rating: '4.2', ratingPrev: '4.0', keywords: '147', keywordsPrev: '95' },
+  week: { ...emptyStatValues },
+  month: { ...emptyStatValues },
+  all: { ...emptyStatValues },
 };
 
 const periodLabels: Record<Period, string> = { week: 'This Week', month: 'This Month', all: 'All Time' };
@@ -169,26 +177,7 @@ function DashboardSkeleton() {
   );
 }
 
-const defaultFeedItems: FeedItem[] = [
-  {
-    id: '1', type: 'keyword', title: '\u201cai task planner\u201d trending',
-    summary: 'Search volume jumped 280% this week. You rank #38 — competitors average #9.',
-    detail: 'This keyword has 9,200 monthly searches and is growing fast. Adding it to your subtitle could yield an estimated +150 daily impressions.',
-    timestamp: '2 hours ago', badge: { label: 'Hot', variant: 'error' }, actionLabel: 'Add to tracked keywords',
-  },
-  {
-    id: '2', type: 'competitor', title: 'Competitor A updated their listing',
-    summary: 'Changed subtitle to \u201cAI Productivity Assistant & Task Planner\u201d — targeting your keywords.',
-    detail: 'Competitor A updated their App Store listing 3 hours ago. They added 2 keywords you\'re tracking: "productivity assistant" and "task planner".',
-    timestamp: '3 hours ago', badge: { label: 'Alert', variant: 'warning' }, actionLabel: 'View competitor analysis',
-  },
-  {
-    id: '3', type: 'content', title: 'New ad copy ready for Apple Search Ads',
-    summary: '3 variations generated targeting your top keyword cluster around "ai productivity app". CTR prediction: 4.2%.',
-    detail: 'Generated 3 headline variations optimized for your top keyword cluster: productivity tools, task management, and AI planning.',
-    timestamp: '5 hours ago', badge: { label: 'Ready', variant: 'success' }, actionLabel: 'Review copy variations',
-  },
-];
+// Feed items now come from useDashboard() hook — no hardcoded defaults
 
 const feedTypeFilters = ['All', 'Keywords', 'Competitors', 'Content', 'TikTok', 'Reviews', 'Launch'] as const;
 const filterTypeMap: Record<string, string> = {
@@ -203,12 +192,12 @@ const quickActions = [
   { label: 'Reviews', icon: MessageSquare, href: '/reviews' },
 ];
 
-// Sparkline mock data per stat (default fallback)
-const defaultSparklineData: Record<string, number[]> = {
-  downloads: [1800, 2100, 2000, 2400, 2300, 2600, 2847],
-  revenue: [3200, 3500, 3400, 3800, 3900, 4100, 4291],
-  rating: [4.0, 4.1, 4.0, 4.1, 4.2, 4.1, 4.2],
-  keywords: [98, 105, 112, 120, 128, 135, 147],
+// Sparkline data populated from real analytics — empty by default
+const emptySparklineData: Record<string, number[]> = {
+  downloads: [],
+  revenue: [],
+  rating: [],
+  keywords: [],
 };
 
 const ANALYTICS_CACHE_KEY = 'zerotask-analytics-cache';
@@ -383,7 +372,7 @@ function StatCard({ label, icon: Icon, color, value, change, sparkData, onSave }
 
   return (
     <div
-      className="card p-4 cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+      className="glass-card p-4 cursor-pointer transition-all duration-200"
       onClick={() => { if (!editing) setEditing(true); }}
     >
       <div className="flex items-center gap-2 mb-2">
@@ -424,8 +413,10 @@ export default function DashboardPage() {
   const { showToast } = useToast();
   const { app, appData: activeAppData, mounted } = useActiveApp();
   const { loading: analyticsLoading, connected: analyticsConnected, error: analyticsError, analyticsData, fetchAnalytics } = useAppStoreAnalytics();
-  const [liveSparklines, setLiveSparklines] = useState<Record<string, number[]>>(defaultSparklineData);
-  const [feedItems, setFeedItems] = useState<FeedItem[]>(defaultFeedItems);
+  const { stats: dashboardStats, feedItems: dashboardFeedItems, loading: dashboardLoading } = useDashboard();
+  const { briefing, dismiss: dismissBriefing } = useBriefing();
+  const [liveSparklines, setLiveSparklines] = useState<Record<string, number[]>>(emptySparklineData);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditError, setAuditError] = useState<string | null>(null);
   const [lastAuditTime, setLastAuditTime] = useState<string | null>(null);
@@ -436,10 +427,38 @@ export default function DashboardPage() {
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [appDataLegacy, setAppDataLegacy] = useState<{ name?: string } | null>(null);
 
+  // Populate feed from dashboard API
+  useEffect(() => {
+    if (dashboardFeedItems.length > 0) {
+      const mapped: FeedItem[] = dashboardFeedItems.map(item => ({
+        id: item.id,
+        type: item.type as FeedItem['type'],
+        title: item.title,
+        summary: item.summary,
+        detail: item.detail || '',
+        timestamp: new Date(item.created_at).toLocaleDateString(),
+        badge: { label: item.badge_label || '', variant: (item.badge_variant || 'success') as 'error' | 'warning' | 'success' },
+        actionLabel: item.action_label || '',
+      }));
+      setFeedItems(mapped);
+    }
+  }, [dashboardFeedItems]);
+
+  // Update keyword count from real dashboard stats
+  useEffect(() => {
+    if (dashboardStats.totalKeywords > 0) {
+      setStatValues(prev => ({
+        week: { ...prev.week, keywords: String(dashboardStats.totalKeywords) },
+        month: { ...prev.month, keywords: String(dashboardStats.totalKeywords) },
+        all: { ...prev.all, keywords: String(dashboardStats.totalKeywords) },
+      }));
+    }
+  }, [dashboardStats.totalKeywords]);
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
+      if (saved && feedItems.length === 0) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) setFeedItems(parsed);
       }
@@ -637,10 +656,10 @@ export default function DashboardPage() {
         }
       />
 
-      {/* Skeleton while auditing */}
-      {isAuditing && <DashboardSkeleton />}
+      {/* Skeleton while loading */}
+      {(isAuditing || dashboardLoading) && <DashboardSkeleton />}
 
-      {!isAuditing && (
+      {!isAuditing && !dashboardLoading && (
         <>
           {!appDataLegacy && !app && (
             <div className="mb-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-sm flex items-center justify-between">
@@ -652,6 +671,36 @@ export default function DashboardPage() {
           {auditError && (
             <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
               {auditError}
+            </div>
+          )}
+
+          {/* AI Morning Briefing */}
+          {briefing && !briefing.read && briefing.content && (
+            <div className="mb-4 glass-card p-4 relative">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                  <Sunrise className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-text-primary mb-1">Morning Briefing</h3>
+                  <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">{briefing.content}</p>
+                  {briefing.highlights.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {briefing.highlights.map((h, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-medium">
+                          {h.title}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={dismissBriefing}
+                  className="p-1 rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-secondary transition-colors shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
 
@@ -691,14 +740,14 @@ export default function DashboardPage() {
           )}
 
           {/* Period Toggle — pill group */}
-          <div className="inline-flex items-center rounded-lg bg-surface-tertiary p-0.5 mb-4">
+          <div className="inline-flex items-center rounded-full glass p-0.5 mb-4">
             {(['week', 'month', 'all'] as Period[]).map(p => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-150 ${
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 ${
                   period === p
-                    ? 'bg-surface text-text-primary shadow-sm'
+                    ? 'bg-accent/15 text-accent shadow-sm'
                     : 'text-text-tertiary hover:text-text-secondary'
                 }`}
               >
@@ -709,7 +758,7 @@ export default function DashboardPage() {
 
           {/* Score + Stats */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-            <div className="lg:col-span-2 card p-6 flex items-center justify-center">
+            <div className="lg:col-span-2 glass-card p-6 flex items-center justify-center">
               <GrowthScore score={growthScore} delta={growthDelta} />
             </div>
             <div className="lg:col-span-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -721,7 +770,7 @@ export default function DashboardPage() {
                   color={s.color}
                   value={s.display}
                   change={s.change}
-                  sparkData={liveSparklines[s.key] || defaultSparklineData[s.key] || []}
+                  sparkData={liveSparklines[s.key] || []}
                   onSave={(val) => handleStatSave(s.key, val.replace(/[$,★]/g, ''))}
                 />
               ))}
@@ -734,7 +783,7 @@ export default function DashboardPage() {
               <div key={a.href} className="relative group">
                 <button
                   onClick={() => router.push(a.href)}
-                  className="w-10 h-10 rounded-lg bg-surface-tertiary flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-accent/10 transition-all duration-150"
+                  className="w-10 h-10 rounded-xl glass flex items-center justify-center text-text-secondary hover:text-accent hover:bg-accent/10 transition-all duration-150"
                 >
                   <a.icon className="w-4 h-4" />
                 </button>
@@ -753,14 +802,14 @@ export default function DashboardPage() {
             </div>
 
             {/* Filter Tabs — segmented control */}
-            <div className="inline-flex items-center rounded-lg bg-surface-tertiary p-0.5 mb-4">
+            <div className="inline-flex items-center rounded-full glass p-0.5 mb-4 flex-wrap">
               {feedTypeFilters.map(f => (
                 <button
                   key={f}
                   onClick={() => setFeedFilter(f)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-150 ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 ${
                     feedFilter === f
-                      ? 'bg-surface text-text-primary shadow-sm'
+                      ? 'bg-accent/15 text-accent shadow-sm'
                       : 'text-text-tertiary hover:text-text-secondary'
                   }`}
                 >
@@ -771,7 +820,7 @@ export default function DashboardPage() {
 
             <div className="space-y-3">
               {filteredFeed.length === 0 ? (
-                <div className="card p-12 text-center">
+                <div className="glass-card p-12 text-center">
                   <div className="w-16 h-16 rounded-full bg-surface-tertiary flex items-center justify-center mx-auto mb-4">
                     <Search className="w-7 h-7 text-text-tertiary" />
                   </div>

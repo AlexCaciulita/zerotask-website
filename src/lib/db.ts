@@ -204,6 +204,77 @@ export async function updateLaunchStep(id: string, data: { status?: string; note
   }
 }
 
+// ── Competitors ───────────────────────────────────────────
+export async function getCompetitors() {
+  try {
+    const { data, error } = await supabase.from('competitors').select('*');
+    if (error) throw error;
+    return data;
+  } catch (e) {
+    console.warn('[db] getCompetitors fallback', e);
+    return lsGet('zerotask-competitors') || [];
+  }
+}
+
+export async function saveCompetitor(data: {
+  app_id: string; name: string; icon?: string; rating?: number;
+  review_count?: number; downloads_estimate?: string;
+  keywords_total?: number; keywords_shared?: number; keywords_unique?: number;
+  scraped_data?: unknown;
+}) {
+  try {
+    const { data: row, error } = await supabase.from('competitors').insert({
+      ...data,
+      last_scraped_at: new Date().toISOString(),
+    }).select().single();
+    if (error) throw error;
+    return row;
+  } catch (e) {
+    console.warn('[db] saveCompetitor fallback', e);
+    const fallback = { id: crypto.randomUUID(), ...data, last_scraped_at: new Date().toISOString(), created_at: new Date().toISOString() };
+    lsPush('zerotask-competitors', fallback);
+    return fallback;
+  }
+}
+
+export async function deleteCompetitor(id: string) {
+  try {
+    const { error } = await supabase.from('competitors').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.warn('[db] deleteCompetitor fallback', e);
+    return false;
+  }
+}
+
+// ── Feed Events (client-side) ─────────────────────────────
+export async function getFeedEvents(limit = 20) {
+  try {
+    const { data, error } = await supabase
+      .from('feed_events')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.warn('[db] getFeedEvents fallback', e);
+    return [];
+  }
+}
+
+export async function markFeedRead(id: string) {
+  try {
+    const { error } = await supabase.from('feed_events').update({ read: true }).eq('id', id);
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.warn('[db] markFeedRead fallback', e);
+    return false;
+  }
+}
+
 // ── Scenarios ──────────────────────────────────────────────
 export async function saveScenario(data: { app_id: string; title: string; variables: unknown; results?: unknown; saved_to_strategy?: boolean }) {
   try {

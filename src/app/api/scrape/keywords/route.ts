@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest, isAuthError } from '@/lib/api-auth';
+import { rateLimit, getScrapeRateLimit, rateLimitHeaders, type PlanTier } from '@/lib/rate-limit';
+import { getServerCredits } from '@/lib/credits-server';
+import { createFeedEvent } from '@/lib/feed-server';
 
 async function getKeywordSuggestionsFromApple(term: string): Promise<string[]> {
   const keywords = new Set<string>();
@@ -47,10 +50,34 @@ export async function POST(req: NextRequest) {
     const auth = await authenticateRequest(req);
     if (isAuthError(auth)) return auth;
 
+    // Rate limiting
+    const credits = await getServerCredits(auth.user.id);
+    const plan = (credits.plan || 'free') as PlanTier;
+    const rlResult = await rateLimit(auth.user.id, getScrapeRateLimit(plan));
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please slow down.' },
+        { status: 429, headers: rateLimitHeaders(rlResult) }
+      );
+    }
+
     const { term, country } = await req.json();
     if (!term) return NextResponse.json({ error: 'term required' }, { status: 400 });
 
     const suggestions = await getKeywordSuggestionsFromApple(term);
+
+    // Fire-and-forget feed event
+    if (suggestions.length > 1) {
+      createFeedEvent({
+        user_id: auth.user.id,
+        type: 'keyword',
+        title: `${suggestions.length} keyword suggestions found`,
+        summary: `Researched keywords for "${term}".`,
+        badge_label: `${suggestions.length}`,
+        badge_variant: 'success',
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ suggestions, count: suggestions.length });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch suggestions' }, { status: 500 });

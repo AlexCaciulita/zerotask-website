@@ -1,11 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { scrapeAppStore, searchAppStore, getAppReviews, getKeywordSuggestions } from '@/lib/scraper';
+import { rateLimit, rateLimitHeaders } from '@/lib/rate-limit';
 
 // Note: This route is intentionally unauthenticated because:
 // 1. It only proxies the free public iTunes Search API (no paid keys exposed)
 // 2. The onboarding page (/) needs it before the user has signed up
+//
+// However, we rate-limit by IP to prevent DDoS abuse.
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit by IP address (no user ID available)
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || req.headers.get('x-real-ip')
+      || 'unknown';
+
+    const rlResult = await rateLimit(ip, {
+      prefix: 'scrape-public',
+      maxRequests: 20,
+      windowSeconds: 60,
+    });
+
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again shortly.' },
+        { status: 429, headers: rateLimitHeaders(rlResult) }
+      );
+    }
+
     const body = await req.json();
     const { action, ...params } = body;
 

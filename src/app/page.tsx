@@ -299,7 +299,7 @@ Be specific and actionable.`;
         />
 
         <div className="text-center max-w-2xl mx-auto animate-fade-in relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-badge bg-accent/10 text-accent text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" />
             AI-Powered App Growth
           </div>
@@ -323,9 +323,9 @@ Be specific and actionable.`;
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 placeholder="Paste your App Store or Google Play link"
-                className={`w-full px-5 py-4 rounded-xl border border-border bg-surface text-text-primary placeholder:text-text-tertiary text-base focus:outline-none transition-all duration-300 ${
+                className={`w-full px-5 py-4 rounded-2xl glass-input !border-border text-text-primary placeholder:text-text-tertiary text-base focus:outline-none transition-all duration-300 ${
                   inputFocused
-                    ? 'ring-2 ring-accent/30 border-accent shadow-[0_0_20px_rgba(16,185,129,0.12)]'
+                    ? 'ring-2 ring-accent/30 !border-accent shadow-[0_0_24px_rgba(16,185,129,0.15)]'
                     : 'shadow-sm'
                 }`}
               />
@@ -339,7 +339,7 @@ Be specific and actionable.`;
             </div>
             <button
               onClick={startAudit}
-              className="px-6 py-4 rounded-xl bg-accent text-white font-semibold text-sm hover:bg-accent-dark flex items-center justify-center gap-2 whitespace-nowrap shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all duration-200"
+              className="px-6 py-4 rounded-2xl bg-accent text-white font-semibold text-sm hover:bg-accent-dark flex items-center justify-center gap-2 whitespace-nowrap shadow-lg shadow-accent/25 hover:shadow-accent/40 hover:scale-[1.02] transition-all duration-200"
             >
               Start Growing <ArrowRight className="w-4 h-4" />
             </button>
@@ -433,7 +433,7 @@ Be specific and actionable.`;
           <p className="text-sm text-text-secondary">Here&apos;s where your app stands — and how to fix it.</p>
         </div>
 
-        <div className="card p-8 mb-6">
+        <div className="glass-card p-8 mb-6">
           <div className="flex flex-col items-center mb-6">
             <GrowthScore score={growthScore} delta={0} label="Growth Score" />
           </div>
@@ -456,7 +456,7 @@ Be specific and actionable.`;
               </div>
               {/* Email capture overlay */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-surface border border-border rounded-2xl p-6 shadow-2xl max-w-sm w-full text-center">
+                <div className="glass-card p-6 shadow-2xl max-w-sm w-full text-center">
                   <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-3">
                     <Lock className="w-5 h-5 text-accent" />
                   </div>

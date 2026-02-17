@@ -8,6 +8,7 @@ import {
 import clsx from 'clsx';
 import { getInfluencers as dbGetInfluencers, saveInfluencer, updateInfluencerStage } from '@/lib/db';
 import { apiFetch } from '@/lib/api-client';
+import EmptyState from '@/components/EmptyState';
 
 type Platform = 'TikTok' | 'Instagram' | 'YouTube';
 type PipelineStage = 'discovered' | 'contacted' | 'responded' | 'negotiating' | 'deal' | 'posted' | 'results';
@@ -36,24 +37,6 @@ const PLATFORM_BADGE: Record<Platform, { icon: string; bg: string }> = {
   Instagram: { icon: '📷', bg: 'bg-gradient-to-br from-purple-500 to-pink-500 text-white' },
   YouTube: { icon: '▶', bg: 'bg-red-600 text-white' },
 };
-
-const INFLUENCERS: Influencer[] = [
-  { id: '1', name: 'Jessica Chen', initials: 'JC', color: COLORS[0], platform: 'TikTok', followers: '85K', followersNum: 85000, engagement: '4.2%', niche: ['Productivity', 'Tutorials'], stage: 'deal', email: 'jess@creator.io', handle: '@creativejess', outreachHistory: ['Jan 15 — Initial DM sent', 'Jan 17 — Responded, interested', 'Jan 20 — Negotiated terms', 'Jan 22 — Deal closed: $200 + lifetime premium'], cashOffer: 200, aiDMs: ['Hey Jessica! 👋 Huge fan of your productivity content. We\'re launching our app, an AI-powered productivity assistant, and think your audience would love it. Want to collab? Free lifetime premium + $200 for a workflow challenge video!', 'Hi Jess! Your recent productivity app comparison was 🔥. We just built something that takes task management to a whole new level. Would love to send you early access and see what you think!', 'Jessica — quick pitch: AI productivity assistant, smart task automation. Your 85K followers are exactly our target audience. Interested in a paid collab? Details below 👇'] },
-  { id: '2', name: 'Mike Torres', initials: 'MT', color: COLORS[1], platform: 'Instagram', followers: '120K', followersNum: 120000, engagement: '3.8%', niche: ['Tech Reviews', 'Lifestyle'], stage: 'posted', email: 'mike@shotby.co', handle: '@shotbymike', outreachHistory: ['Jan 10 — DM sent', 'Jan 11 — Responded same day', 'Jan 14 — Sent app access', 'Jan 20 — Posted reel, 45K views'], cashOffer: 350, aiDMs: ['Mike! Your tech review content is insane. We built an AI productivity tool that automates your daily workflows. Would love to send you early access + sponsorship for a reel.', 'Hey Mike, saw your latest gear review. What if the best productivity app wasn\'t hardware — it was AI? Check out our app. Happy to sponsor a review post!', 'Hi Mike — launching an AI productivity assistant next week. Your audience = our perfect users. Interested in early access + paid collab?'] },
-  { id: '3', name: 'Sarah Kim', initials: 'SK', color: COLORS[2], platform: 'TikTok', followers: '200K', followersNum: 200000, engagement: '5.1%', niche: ['Workflow Tips', 'Self-Improvement'], stage: 'posted', email: 'sarah@editqueen.co', handle: '@editqueen', outreachHistory: ['Jan 8 — DM via management', 'Jan 12 — Management responded', 'Jan 15 — Terms agreed', 'Jan 25 — Video posted, 120K views!'], cashOffer: 500, aiDMs: ['Sarah, your productivity content is what inspired us to build this app. AI-powered task suggestions that actually work. Would your audience love a "before/after workflow" challenge video?', 'Hey! Love @editqueen content. We\'re launching an AI productivity assistant — perfect for workflow optimization content. Interested in early access + a sponsored collab?', 'Hi Sarah\'s team — reaching out about our AI productivity assistant launching on Product Hunt. Sarah\'s before/after style would be perfect. Details attached.'] },
-  { id: '4', name: 'Sam Patel', initials: 'SP', color: COLORS[3], platform: 'YouTube', followers: '45K', followersNum: 45000, engagement: '6.2%', niche: ['App Reviews', 'Tech'], stage: 'negotiating', email: 'sam@techreviews.dev', handle: '@samreviews_tech', outreachHistory: ['Jan 18 — Email sent', 'Jan 20 — Replied, wants to try app first'], cashOffer: 150, aiDMs: ['Sam! Big fan of your app review videos. We\'re launching our AI productivity assistant — would love to send you early access for an honest review. Also happy to sponsor the video.', 'Hey Sam, your in-depth app reviews are exactly what we need. Our AI assistant is launching next week. Free lifetime + sponsorship for a review?', 'Hi Sam — Our AI productivity tool is launching on PH next week. Your review style is perfect for our audience. Interested?'] },
-  { id: '5', name: 'Ava Wright', initials: 'AW', color: COLORS[4], platform: 'Instagram', followers: '60K', followersNum: 60000, engagement: '4.8%', niche: ['Lifestyle', 'Organization'], stage: 'contacted', email: 'ava@filterfinds.io', handle: '@filterfinds', outreachHistory: ['Jan 22 — DM sent, no response yet'], cashOffer: 180, aiDMs: ['Ava! Love your organization posts. We built an AI assistant that adapts to your workflow preferences. Would love to collab — free premium + sponsorship!', 'Hey Ava, your audience trusts your app picks. What if we showed them AI task management that gets smarter? Early access + paid post?', 'Hi Ava — Our app = AI-powered productivity that actually understands you. Think your 60K followers would love it. Interested in a collab?'] },
-  { id: '6', name: 'David Park', initials: 'DP', color: COLORS[5], platform: 'TikTok', followers: '310K', followersNum: 310000, engagement: '3.5%', niche: ['Productivity Hacks', 'Viral'], stage: 'discovered', email: 'david@prodhacks.com', handle: '@davidsprodtips', outreachHistory: [], cashOffer: 800, aiDMs: ['David! Your productivity hack videos are incredibly creative. We\'re launching an AI task assistant — imagine a "productivity hack" challenge video. Interested?', 'Hey David, 310K followers who love productivity tips = dream collab for us. Our app does AI task management in one tap. Want early access?', 'Hi David — we built an AI productivity assistant. Your viral hacks + our AI = amazing content potential. Let\'s chat!'] },
-  { id: '7', name: 'Luna Martinez', initials: 'LM', color: COLORS[6], platform: 'Instagram', followers: '95K', followersNum: 95000, engagement: '4.5%', niche: ['Tech', 'Lifestyle'], stage: 'responded', email: 'luna@lunamartinez.com', handle: '@lunatech', outreachHistory: ['Jan 19 — DM sent', 'Jan 21 — Responded: "Sounds interesting, tell me more"'], cashOffer: 250, aiDMs: ['Luna! Your tech content is stunning. We built AI-powered task automation features. Would love your take on it + a collab!', 'Hey Luna, imagine one-tap perfect task management. Your lifestyle audience would love it. Interested in early access?', 'Hi Luna — reaching out about our AI productivity app. Smart automation that actually works for you. Your feed is the perfect showcase. Collab?'] },
-  { id: '8', name: 'Tyler Brooks', initials: 'TB', color: COLORS[7], platform: 'YouTube', followers: '78K', followersNum: 78000, engagement: '5.8%', niche: ['Tutorials', 'Software'], stage: 'contacted', email: 'tyler@tyleredits.com', handle: '@tyleredits', outreachHistory: ['Jan 21 — Email sent with product info'], cashOffer: 220, aiDMs: ['Tyler! Your tutorial videos are so well-produced. We\'d love to sponsor an "AI Assistant vs Manual Workflow" video. Thoughts?', 'Hey Tyler, big fan of your workflow videos. What if AI could do 80% of the planning? That\'s our app. Interested in a sponsored review?', 'Hi Tyler — Our AI assistant is perfect for a tutorial video. Sponsorship + lifetime premium. Let me know!'] },
-  { id: '9', name: 'Mia Zhang', initials: 'MZ', color: COLORS[8], platform: 'TikTok', followers: '150K', followersNum: 150000, engagement: '6.0%', niche: ['Creative Tools', 'Art'], stage: 'discovered', email: 'mia@miazhang.art', handle: '@miamakesart', outreachHistory: [], cashOffer: 400, aiDMs: ['Mia! Your creative content is next level. We built an AI assistant with smart workflow features. Would love to see what you\'d create with it!', 'Hey Mia, your creative content always blows up. Our app has AI automation features that would make amazing content. Interested?', 'Hi Mia — Our AI + your creativity = viral content. Free premium + sponsorship for a productivity challenge video?'] },
-  { id: '10', name: 'Jake Wilson', initials: 'JW', color: COLORS[9], platform: 'Instagram', followers: '42K', followersNum: 42000, engagement: '7.1%', niche: ['Productivity Coach', 'Urban'], stage: 'deal', email: 'jake@jakewilson.co', handle: '@jakesprodhacks', outreachHistory: ['Jan 12 — DM sent', 'Jan 13 — Responded', 'Jan 16 — Call scheduled', 'Jan 18 — Deal: barter only (lifetime premium)'], cashOffer: 0, aiDMs: ['Jake! Your productivity coaching content is incredible. We built AI task management that works for everyone. Would love to give you lifetime premium for a post!', 'Hey Jake, one-tap smart task planning — that\'s our app. Perfect for your style. Free lifetime premium for a review post?', 'Hi Jake — Our AI assistant helps you work smarter, not harder. Barter deal: lifetime premium for an honest IG post?'] },
-  { id: '11', name: 'Emma Davis', initials: 'ED', color: COLORS[10], platform: 'TikTok', followers: '520K', followersNum: 520000, engagement: '2.8%', niche: ['Productivity', 'Lifestyle'], stage: 'discovered', email: 'emma@emmadavis.co', handle: '@emmaproduces', outreachHistory: [], cashOffer: 1200, aiDMs: ['Emma! With 520K followers, you set productivity trends. Our app is the next trend — AI task management in one tap. Premium collab opportunity!', 'Hey Emma, your content defines what\'s trending in productivity. We\'d love to work together on our launch content.', 'Hi Emma\'s team — Our AI productivity assistant is launching on Product Hunt. Emma would be an incredible launch partner. Details below.'] },
-  { id: '12', name: 'Noah Thompson', initials: 'NT', color: COLORS[11], platform: 'YouTube', followers: '165K', followersNum: 165000, engagement: '4.0%', niche: ['App Reviews', 'Gear'], stage: 'contacted', email: 'noah@noahthompson.co', handle: '@noahtechreviews', outreachHistory: ['Jan 20 — Email via management'], cashOffer: 450, aiDMs: ['Noah! Your app review videos are gold. We built an AI productivity tool that streamlines everything. Sponsored video opportunity?', 'Hey Noah, imagine AI that handles all the busywork you talk about. That\'s our app. Would love to sponsor a review/comparison video.', 'Hi Noah — Our AI productivity assistant is here. Your 165K tech audience is our dream demographic. Interested in a collab?'] },
-  { id: '13', name: 'Zoe Clark', initials: 'ZC', color: COLORS[12], platform: 'Instagram', followers: '88K', followersNum: 88000, engagement: '5.3%', niche: ['Wellness', 'Work-Life Balance'], stage: 'responded', email: 'zoe@zoeclark.co', handle: '@zoewellness', outreachHistory: ['Jan 17 — DM sent', 'Jan 22 — Responded: "I\'d love to try it!"'], cashOffer: 200, aiDMs: ['Zoe! Your work-life balance content is exactly what our AI was built for. Would love to send you early access + collab!', 'Hey Zoe, balanced productivity + AI = a perfect match. Early access + paid post?', 'Hi Zoe — we built AI productivity for intentional workers. Your aesthetic is perfect. Interested in early access?'] },
-  { id: '14', name: 'Ryan Lee', initials: 'RL', color: COLORS[13], platform: 'TikTok', followers: '73K', followersNum: 73000, engagement: '5.5%', niche: ['Daily Productivity', 'Tips'], stage: 'results', email: 'ryan@ryanlee.dev', handle: '@ryanprodlife', outreachHistory: ['Jan 5 — DM sent', 'Jan 6 — Responded', 'Jan 8 — Deal closed: $150 + premium', 'Jan 15 — Video posted', 'Jan 22 — Results: 89K views, 2.1K clicks'], cashOffer: 150, aiDMs: ['Ryan! Daily productivity tips + AI task management = perfect combo. Want to try our app and make a video?', 'Hey Ryan, we built the best AI productivity assistant. Your tips audience would love it. Collab?', 'Hi Ryan — AI-powered productivity. Workflow focused. Sponsorship + early access?'] },
-  { id: '15', name: 'Chloe Wang', initials: 'CW', color: COLORS[14], platform: 'YouTube', followers: '230K', followersNum: 230000, engagement: '3.2%', niche: ['Lifestyle Apps', 'Reviews'], stage: 'negotiating', email: 'chloe@chloewang.com', handle: '@chloereviews', outreachHistory: ['Jan 14 — Email sent', 'Jan 16 — Management replied', 'Jan 20 — Rate card received: $600 for dedicated video'], cashOffer: 600, aiDMs: ['Chloe! Your creative app reviews are so thorough. We\'d love our app to be your next review — AI productivity done right.', 'Hey Chloe, your audience trusts your app picks. Our AI assistant is launching and we\'d love a sponsored review. Details?', 'Hi Chloe\'s team — sponsorship inquiry for our AI productivity assistant review. Budget available for dedicated video.'] },
-];
 
 function formatFollowers(n: number): string {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
@@ -105,15 +88,6 @@ export default function InfluencersPage() {
             aiDMs: [],
           }));
           setDbInfluencers(mapped);
-        } else {
-          // Seed defaults
-          for (const inf of INFLUENCERS) {
-            await saveInfluencer({
-              name: inf.name, platform: inf.platform, handle: inf.handle,
-              followers: inf.followersNum, engagement: inf.engagement,
-              niche: inf.niche, email: inf.email,
-            });
-          }
         }
       } catch (e) {
         console.warn('Failed to load influencers from Supabase', e);
@@ -129,10 +103,11 @@ export default function InfluencersPage() {
       const appData = getAppData();
       const res = await apiFetch('/api/ai', { method: 'POST', body: JSON.stringify({ task: 'suggest-influencers', appData, count: 8 }) });
       const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Failed');
-      let results: any[] = [];
+      interface AISuggestion { name?: string; handle?: string; platform?: string; followers?: string; followersNum?: number; engagement?: string; niche?: string | string[]; cashOffer?: number; dmDraft?: string }
+      let results: AISuggestion[] = [];
       if (Array.isArray(data.result)) results = data.result;
       else if (typeof data.result === 'string') { const match = data.result.match(/\[[\s\S]*\]/); if (match) results = JSON.parse(match[0]); }
-      const newInfluencers: Influencer[] = results.map((r: any, i: number) => ({
+      const newInfluencers: Influencer[] = results.map((r: AISuggestion, i: number) => ({
         id: `ai-${Date.now()}-${i}`, name: r.name || `Influencer ${i + 1}`,
         initials: (r.name || 'AI').split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase(),
         color: COLORS[i % COLORS.length], platform: (r.platform || 'TikTok') as Platform,
@@ -147,7 +122,7 @@ export default function InfluencersPage() {
     finally { setSuggestLoading(false); }
   }, []);
 
-  const baseInfluencers = dbLoaded && dbInfluencers.length > 0 ? dbInfluencers : INFLUENCERS;
+  const baseInfluencers = dbLoaded && dbInfluencers.length > 0 ? dbInfluencers : [];
   const allInfluencers = [...baseInfluencers, ...aiInfluencers];
   const filtered = allInfluencers.filter(i => i.name.toLowerCase().includes(search.toLowerCase()) || i.platform.toLowerCase().includes(search.toLowerCase()) || i.niche.some(n => n.toLowerCase().includes(search.toLowerCase())));
 
@@ -228,6 +203,17 @@ export default function InfluencersPage() {
       </div>
 
       {suggestError && <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">{suggestError}</div>}
+
+      {/* ── Empty State ── */}
+      {dbLoaded && !suggestLoading && allInfluencers.length === 0 && (
+        <EmptyState
+          icon={Users}
+          title="No influencers yet"
+          description="Use AI to discover influencers in your niche, or add them manually."
+          actionLabel="Discover with AI"
+          onAction={suggestInfluencers}
+        />
+      )}
 
       {/* ── Grid View ── */}
       {view === 'grid' && (

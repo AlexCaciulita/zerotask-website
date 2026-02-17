@@ -8,6 +8,7 @@ import {
 import clsx from 'clsx';
 import { getLaunchSteps, saveLaunchStep, updateLaunchStep as dbUpdateLaunchStep } from '@/lib/db';
 import { apiFetch } from '@/lib/api-client';
+import EmptyState from '@/components/EmptyState';
 
 type StepStatus = 'queued' | 'in-progress' | 'done' | 'measured';
 
@@ -37,58 +38,60 @@ const STATUS_CONFIG: Record<StepStatus, { icon: React.ReactNode; label: string; 
 
 const STATUS_ORDER: StepStatus[] = ['queued', 'in-progress', 'done', 'measured'];
 
-const DEFAULT_WEEKS: Week[] = [
-  {
-    label: 'Week -2', key: 'w-2',
-    steps: [
-      { id: '1', title: 'Finalize listing', status: 'done', description: 'Polish app store listing with optimized title, subtitle, and keyword field.', aiContent: 'Title: "My App — Smart Productivity Tool"\nSubtitle: "Get more done with AI-powered workflows"' },
-      { id: '2', title: 'Generate ad creative', status: 'done', description: 'Create ad variations for Apple Search Ads, Meta, and TikTok campaigns.', aiContent: 'Ad Set 1 (Apple Search Ads):\nHeadline: "Stop Wasting Time — Let AI Handle Your Busywork"' },
-      { id: '3', title: 'Build landing page', status: 'done', description: 'Create a conversion-optimized landing page.', aiContent: 'Landing page structure:\n1. Hero: "Work Smarter, Not Harder" + app mockup\n2. Feature grid\n3. Productivity stats\n4. Testimonials\n5. Download CTA' },
-      { id: '4', title: 'Identify influencers', status: 'done', description: 'Find 15-20 micro-influencers in the productivity/tech niche.', aiContent: 'Top 5 identified:\n1. @prodcoach_jess (TikTok, 85K)\n2. @techlife_mike (Instagram, 120K)\n3. @workflow_queen (TikTok, 200K)' },
-      { id: '5', title: 'Draft community posts', status: 'in-progress', description: 'Write posts for Reddit, Product Hunt, and Indie Hackers.', aiContent: 'Reddit Draft (r/productivity):\n"I built an AI assistant that automates your daily busywork — productivity went up 5x"' },
-    ],
-  },
-  {
-    label: 'Week -1', key: 'w-1',
-    steps: [
-      { id: '6', title: 'Send influencer outreach', status: 'in-progress', description: 'Send personalized DMs to identified influencers.', aiContent: 'DM Template:\n"Hey [name]! 👋 Love your content. We\'re building an AI productivity tool — want early access + lifetime premium?"' },
-      { id: '7', title: 'Social teases', status: 'in-progress', description: 'Post teaser content building anticipation.', aiContent: 'Tweet thread:\n1/5: "What if AI could handle all your repetitive tasks for you? 🤔"' },
-      { id: '8', title: 'Set up tracking', status: 'done', description: 'Configure analytics: RevenueCat, PostHog, UTM tracking.', aiContent: '✅ RevenueCat — subscription events\n✅ PostHog — user behavior\n✅ UTM params — campaign attribution' },
-      { id: '9', title: 'Schedule Product Hunt', status: 'queued', description: 'Prepare Product Hunt listing with all assets.', aiContent: 'Product Hunt Listing:\nTagline: "AI that handles your busywork so you can focus on what matters"' },
-      { id: '10', title: 'Prepare review requests', status: 'queued', description: 'Draft review request emails to beta testers.', aiContent: 'Email template:\nSubject: "Quick favor? 🙏 Our app is launching!"' },
-    ],
-  },
-  {
-    label: '🚀 Launch Day', key: 'launch',
-    steps: [
-      { id: '11', title: 'Product Hunt live', status: 'queued', description: 'Go live on Product Hunt. Respond to every comment within 15 min.', aiContent: 'Launch checklist:\n⬜ Post goes live at 12:01 AM PST\n⬜ Share link to supporters' },
-      { id: '12', title: 'Community posts fire', status: 'queued', description: 'Publish all prepared community posts.', aiContent: 'Posting schedule:\n6:00 AM PST — Reddit r/SideProject\n7:00 AM PST — Reddit r/productivity' },
-      { id: '13', title: 'Ads activate', status: 'queued', description: 'Launch Apple Search Ads and Meta campaigns.', aiContent: '🔵 Apple Search Ads — $50/day\n🟣 Meta Ads — $30/day\n🟡 TikTok — $20/day' },
-      { id: '14', title: 'Social scheduled', status: 'queued', description: 'All pre-scheduled social media posts go live.', aiContent: '6 AM — "It\'s here! 🚀" tweet\n9 AM — Instagram carousel\n12 PM — Twitter thread' },
-      { id: '15', title: 'Monitor & respond', status: 'queued', description: 'Active monitoring of all channels.', aiContent: '📊 Product Hunt rank + upvotes\n📊 App Store downloads\n📊 Social mentions & DMs' },
-    ],
-  },
-  {
-    label: 'Week +1', key: 'w+1',
-    steps: [
-      { id: '16', title: 'Analyze channels', status: 'queued', description: 'Deep analysis of which acquisition channels performed best.', aiContent: 'Channel analysis framework:\n1. Cost per install by channel\n2. Trial start rate by source' },
-      { id: '17', title: 'Double down on winners', status: 'queued', description: 'Increase budget on top-performing channels.', aiContent: 'If CPI < $2.00 → Increase budget 50%\nIf CPI > $4 → Pause, reallocate' },
-      { id: '18', title: 'Respond to reviews', status: 'queued', description: 'Reply to all App Store reviews.', aiContent: '⭐⭐⭐⭐⭐: "Thank you so much!"\n⭐: "We\'re sorry. Email support@myapp.app"' },
-      { id: '19', title: 'Thank influencers', status: 'queued', description: 'Send thank you messages with performance metrics.', aiContent: '"Hey [name]! Your post got [X views, Y clicks]! 🙌"' },
-      { id: '20', title: 'Post week 1 update', status: 'queued', description: 'Share week 1 metrics publicly.', aiContent: '"📊 Week 1 Numbers:\n• 2,400 downloads\n• 680 trial starts"' },
-    ],
-  },
-  {
-    label: 'Week +2', key: 'w+2',
-    steps: [
-      { id: '21', title: 'Keyword optimization', status: 'queued', description: 'Analyze keyword rankings and optimize metadata.', aiContent: '📈 Rising: "ai productivity assistant" — add to subtitle\n📉 Dropping: "task app free" — deprioritize' },
-      { id: '22', title: 'A/B test screenshots', status: 'queued', description: 'Set up screenshot A/B tests.', aiContent: 'Test 1: Feature-focused vs Lifestyle\nTest 2: Dark vs Light background' },
-      { id: '23', title: 'Refresh ad copy', status: 'queued', description: 'Create new ad variations based on performance data.', aiContent: 'Variation A: "Get things done so fast your team thinks you hired an assistant"' },
-      { id: '24', title: 'Expand keywords', status: 'queued', description: 'Add new keyword opportunities.', aiContent: '1. "ai task planner" — Vol: 4,500, Diff: 28\n2. "smart workflow app" — Vol: 2,100' },
-      { id: '25', title: 'Monitor competitors', status: 'queued', description: 'Track competitor responses to your launch.', aiContent: '🔍 Competitor A — No changes\n🔍 Competitor B — Updated subtitle' },
-    ],
-  },
-];
+function getDefaultLaunchSteps(): Week[] {
+  return [
+    {
+      label: 'Week -2', key: 'w-2',
+      steps: [
+        { id: '1', title: 'Finalize listing', status: 'queued', description: 'Polish app store listing with optimized title, subtitle, and keyword field.', aiContent: '' },
+        { id: '2', title: 'Generate ad creative', status: 'queued', description: 'Create ad variations for Apple Search Ads, Meta, and TikTok campaigns.', aiContent: '' },
+        { id: '3', title: 'Build landing page', status: 'queued', description: 'Create a conversion-optimized landing page.', aiContent: '' },
+        { id: '4', title: 'Identify influencers', status: 'queued', description: 'Find 15-20 micro-influencers in the productivity/tech niche.', aiContent: '' },
+        { id: '5', title: 'Draft community posts', status: 'queued', description: 'Write posts for Reddit, Product Hunt, and Indie Hackers.', aiContent: '' },
+      ],
+    },
+    {
+      label: 'Week -1', key: 'w-1',
+      steps: [
+        { id: '6', title: 'Send influencer outreach', status: 'queued', description: 'Send personalized DMs to identified influencers.', aiContent: '' },
+        { id: '7', title: 'Social teases', status: 'queued', description: 'Post teaser content building anticipation.', aiContent: '' },
+        { id: '8', title: 'Set up tracking', status: 'queued', description: 'Configure analytics: RevenueCat, PostHog, UTM tracking.', aiContent: '' },
+        { id: '9', title: 'Schedule Product Hunt', status: 'queued', description: 'Prepare Product Hunt listing with all assets.', aiContent: '' },
+        { id: '10', title: 'Prepare review requests', status: 'queued', description: 'Draft review request emails to beta testers.', aiContent: '' },
+      ],
+    },
+    {
+      label: 'Launch Day', key: 'launch',
+      steps: [
+        { id: '11', title: 'Product Hunt live', status: 'queued', description: 'Go live on Product Hunt. Respond to every comment within 15 min.', aiContent: '' },
+        { id: '12', title: 'Community posts fire', status: 'queued', description: 'Publish all prepared community posts.', aiContent: '' },
+        { id: '13', title: 'Ads activate', status: 'queued', description: 'Launch Apple Search Ads and Meta campaigns.', aiContent: '' },
+        { id: '14', title: 'Social scheduled', status: 'queued', description: 'All pre-scheduled social media posts go live.', aiContent: '' },
+        { id: '15', title: 'Monitor & respond', status: 'queued', description: 'Active monitoring of all channels.', aiContent: '' },
+      ],
+    },
+    {
+      label: 'Week +1', key: 'w+1',
+      steps: [
+        { id: '16', title: 'Analyze channels', status: 'queued', description: 'Deep analysis of which acquisition channels performed best.', aiContent: '' },
+        { id: '17', title: 'Double down on winners', status: 'queued', description: 'Increase budget on top-performing channels.', aiContent: '' },
+        { id: '18', title: 'Respond to reviews', status: 'queued', description: 'Reply to all App Store reviews.', aiContent: '' },
+        { id: '19', title: 'Thank influencers', status: 'queued', description: 'Send thank you messages with performance metrics.', aiContent: '' },
+        { id: '20', title: 'Post week 1 update', status: 'queued', description: 'Share week 1 metrics publicly.', aiContent: '' },
+      ],
+    },
+    {
+      label: 'Week +2', key: 'w+2',
+      steps: [
+        { id: '21', title: 'Keyword optimization', status: 'queued', description: 'Analyze keyword rankings and optimize metadata.', aiContent: '' },
+        { id: '22', title: 'A/B test screenshots', status: 'queued', description: 'Set up screenshot A/B tests.', aiContent: '' },
+        { id: '23', title: 'Refresh ad copy', status: 'queued', description: 'Create new ad variations based on performance data.', aiContent: '' },
+        { id: '24', title: 'Expand keywords', status: 'queued', description: 'Add new keyword opportunities.', aiContent: '' },
+        { id: '25', title: 'Monitor competitors', status: 'queued', description: 'Track competitor responses to your launch.', aiContent: '' },
+      ],
+    },
+  ];
+}
 
 const PH_COMPARISON = {
   tuesday: { avgUpvotes: 487, topPercent: 'Top 15%', avgComments: 64, featureChance: '22%', avgTraffic: '3,200' },
@@ -100,12 +103,14 @@ import { useActiveApp } from '@/lib/useActiveApp';
 export default function LaunchPage() {
   const { app, mounted } = useActiveApp();
   const getAppData = () => ({ name: app?.name || 'App', category: app?.category || 'General', platform: app?.platform?.toLowerCase() || 'ios' });
-  const [weeks, setWeeks] = useState<Week[]>(DEFAULT_WEEKS);
+  const [weeks, setWeeks] = useState<Week[]>([]);
   const [selectedStep, setSelectedStep] = useState<Step | null>(null);
   const [launchDay, setLaunchDay] = useState<'tuesday' | 'thursday'>('tuesday');
   const [stepNotes, setStepNotes] = useState<Record<string, string>>({});
   const [generatingContent, setGeneratingContent] = useState(false);
   const [aiContentOpen, setAiContentOpen] = useState(true);
+  const [loaded, setLoaded] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
     // Load localStorage immediately
@@ -116,8 +121,9 @@ export default function LaunchPage() {
       try {
         const data = await getLaunchSteps(appId);
         if (data && data.length > 0) {
+          const defaults = getDefaultLaunchSteps();
           // Map DB rows back into weeks structure
-          const newWeeks = DEFAULT_WEEKS.map(w => ({
+          const newWeeks = defaults.map(w => ({
             ...w,
             steps: w.steps.map(s => {
               const dbStep = data.find((d: Record<string, unknown>) => d.step_key === s.id);
@@ -138,21 +144,12 @@ export default function LaunchPage() {
             if (d.notes && d.step_key) notes[d.step_key as string] = d.notes as string;
           });
           if (Object.keys(notes).length > 0) setStepNotes(prev => ({ ...prev, ...notes }));
-        } else {
-          // Seed defaults
-          for (const w of DEFAULT_WEEKS) {
-            for (let i = 0; i < w.steps.length; i++) {
-              const s = w.steps[i];
-              await saveLaunchStep({
-                app_id: appId, step_key: s.id, title: s.title,
-                description: s.description, status: s.status,
-                ai_content: s.aiContent, week_label: w.key, sort_order: i,
-              });
-            }
-          }
         }
+        // When empty, don't auto-seed — EmptyState will render instead
       } catch (e) {
         console.warn('Failed to load launch steps from Supabase', e);
+      } finally {
+        setLoaded(true);
       }
     }
     loadFromDb();
@@ -199,15 +196,72 @@ export default function LaunchPage() {
     } catch {} finally { setGeneratingContent(false); }
   }, [weeks, stepNotes]);
 
+  const seedLaunchPlan = useCallback(async () => {
+    setSeeding(true);
+    const appId = typeof window !== 'undefined' ? (localStorage.getItem('zerotask-active-app') || 'default') : 'default';
+    const defaults = getDefaultLaunchSteps();
+    try {
+      for (const w of defaults) {
+        for (let i = 0; i < w.steps.length; i++) {
+          const s = w.steps[i];
+          await saveLaunchStep({
+            app_id: appId, step_key: s.id, title: s.title,
+            description: s.description, status: s.status,
+            ai_content: s.aiContent, week_label: w.key, sort_order: i,
+          });
+        }
+      }
+      setWeeks(defaults);
+      saveState(defaults);
+    } catch (e) {
+      console.warn('Failed to seed launch steps', e);
+    } finally {
+      setSeeding(false);
+    }
+  }, [stepNotes]);
+
   const totalSteps = weeks.reduce((a, w) => a + w.steps.length, 0);
   const doneSteps = weeks.reduce((a, w) => a + w.steps.filter(s => s.status === 'done' || s.status === 'measured').length, 0);
-  const progressPercent = Math.round((doneSteps / totalSteps) * 100);
+  const progressPercent = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
 
   // Segmented progress per phase
   const phaseProgress = weeks.map(w => {
     const done = w.steps.filter(s => s.status === 'done' || s.status === 'measured').length;
     return { label: w.label, done, total: w.steps.length, pct: w.steps.length ? Math.round((done / w.steps.length) * 100) : 0 };
   });
+
+  if (!loaded) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+        </div>
+      </div>
+    );
+  }
+
+  if (weeks.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+            <Rocket className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">Launch Sequencer</h1>
+            <p className="text-sm text-neutral-500">{getAppData()?.name || 'Your App'} — 5-week launch plan</p>
+          </div>
+        </div>
+        <EmptyState
+          icon={Rocket}
+          title="No launch plan yet"
+          description="Initialize a 5-week launch plan with pre-built steps for Product Hunt, social media, and influencer outreach."
+          actionLabel={seeding ? 'Initializing...' : 'Initialize Launch Plan'}
+          onAction={seeding ? undefined : seedLaunchPlan}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

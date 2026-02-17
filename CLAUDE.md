@@ -21,7 +21,7 @@ Every Claude session must follow this protocol:
 ## Key Architecture
 - Every page is `'use client'` — no SSR currently
 - **Auth**: Supabase auth with Bearer token on all API routes (via `src/lib/api-auth.ts`)
-- **Database**: Supabase with RLS on all 10 tables (35 policies)
+- **Database**: Supabase with RLS on all 10 tables (35 policies). Webhook uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS.
 - **Payments**: Stripe subscriptions (Pro/Creator) + credit packs (10/50/100)
 - **API Client**: All client-side fetches use `apiFetch()` from `src/lib/api-client.ts`
 - **Key server files**: `src/lib/supabase-server.ts`, `src/lib/api-auth.ts`, `src/lib/api-client.ts`
@@ -37,5 +37,4 @@ Every Claude session must follow this protocol:
 - Global `*` CSS transition in globals.css (performance concern)
 - Sidebar collapse doesn't adjust main content offset
 - `/scenarios` page not linked in sidebar navigation
-- Not a git repository yet
-- Missing env vars: STRIPE_WEBHOOK_SECRET, 5 Stripe price IDs, POSTIZ_TIKTOK_INTEGRATION_ID
+- Missing env var: POSTIZ_TIKTOK_INTEGRATION_ID

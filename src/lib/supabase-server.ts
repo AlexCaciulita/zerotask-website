@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -15,4 +15,18 @@ export function createServerSupabaseClient(accessToken: string) {
       },
     },
   });
+}
+
+// ── Service Role Client (singleton) ────────────────────────────
+// Bypasses RLS — use for server-side operations that need full access.
+let _serviceClient: SupabaseClient | null = null;
+
+export function createServiceSupabaseClient(): SupabaseClient {
+  if (!_serviceClient) {
+    _serviceClient = createClient(
+      supabaseUrl,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _serviceClient;
 }

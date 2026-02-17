@@ -100,7 +100,7 @@ export default function PricingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent" />
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-3xl" />
         <div className="relative max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-badge bg-emerald-500/10 border-emerald-500/20 text-emerald-400 text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" /> Trusted by 2,000+ app developers
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text-primary tracking-tight">
@@ -137,7 +137,7 @@ export default function PricingPage() {
       <section className="px-4 pb-20 -mt-4">
         <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-5">
           {/* Pro */}
-          <div className="rounded-2xl border border-border bg-surface-card p-7 flex flex-col">
+          <div className="glass-card p-7 flex flex-col">
             <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
               Pro <Crown className="w-4 h-4 text-emerald-400" />
             </h3>
@@ -166,7 +166,7 @@ export default function PricingPage() {
           </div>
 
           {/* Creator — highlighted */}
-          <div className="relative rounded-2xl border-2 border-violet-500 bg-surface-card p-7 flex flex-col shadow-xl shadow-violet-500/10">
+          <div className="relative glass-card !border-2 !border-violet-500 p-7 flex flex-col shadow-xl shadow-violet-500/10">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full text-white text-xs font-semibold">
               BEST FOR CREATORS
             </div>
@@ -198,7 +198,7 @@ export default function PricingPage() {
           </div>
 
           {/* Enterprise */}
-          <div className="rounded-2xl border border-border bg-surface-card p-7 flex flex-col opacity-75">
+          <div className="glass-card p-7 flex flex-col opacity-75">
             <h3 className="text-lg font-semibold text-text-primary">Enterprise</h3>
             <p className="text-sm text-text-secondary mt-1">For teams & agencies</p>
             <div className="mt-6">
@@ -263,7 +263,7 @@ export default function PricingPage() {
               { icon: Star, label: 'Review Tools', old: '$100/mo', replacement: 'Review Analysis' },
               { icon: Shield, label: 'Creative Suite', old: '$200/mo', replacement: 'AI Copy + TikTok Studio' },
             ].map(item => (
-              <div key={item.label} className="rounded-xl border border-border bg-surface-card p-5">
+              <div key={item.label} className="glass-card !rounded-xl p-5">
                 <item.icon className="w-6 h-6 text-emerald-400 mx-auto mb-3" />
                 <p className="text-sm font-medium text-text-primary">{item.label}</p>
                 <p className="text-xl font-bold text-red-400 line-through">{item.old}</p>
@@ -280,7 +280,7 @@ export default function PricingPage() {
           <h2 className="text-2xl font-bold text-text-primary text-center mb-10">Loved by app developers</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map(t => (
-              <div key={t.name} className="rounded-2xl border border-border bg-surface-card p-6">
+              <div key={t.name} className="glass-card p-6">
                 <div className="flex gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />)}
                 </div>
@@ -304,7 +304,7 @@ export default function PricingPage() {
           <h2 className="text-2xl font-bold text-text-primary text-center mb-10">Frequently Asked Questions</h2>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <div key={i} className="rounded-xl border border-border bg-surface-card overflow-hidden">
+              <div key={i} className="glass-card !rounded-xl overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between px-6 py-4 text-left"
@@ -326,7 +326,7 @@ export default function PricingPage() {
       {/* Money-back guarantee */}
       <section className="px-4 pb-20">
         <div className="max-w-md mx-auto text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5">
+          <div className="inline-flex items-center gap-3 px-6 py-4 glass-card border-emerald-500/20 bg-emerald-500/5">
             <Shield className="w-8 h-8 text-emerald-400" />
             <div className="text-left">
               <p className="text-sm font-semibold text-text-primary">30-Day Money-Back Guarantee</p>
@@ -338,7 +338,7 @@ export default function PricingPage() {
 
       {/* Final CTA */}
       <section className="px-4 pb-20">
-        <div className="max-w-2xl mx-auto text-center rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border border-emerald-500/20 p-12">
+        <div className="max-w-2xl mx-auto text-center glass-card bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 !border-emerald-500/20 p-12">
           <h2 className="text-3xl font-bold text-text-primary">Ready to grow?</h2>
           <p className="mt-3 text-text-secondary">Start your 14-day free trial today. No credit card required.</p>
           <button

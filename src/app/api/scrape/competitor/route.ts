@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchApps, lookupApp, extractAppIdFromUrl, type AppStoreData } from '@/lib/app-store-scraper';
 import { authenticateRequest, isAuthError } from '@/lib/api-auth';
+import { rateLimit, getScrapeRateLimit, rateLimitHeaders, type PlanTier } from '@/lib/rate-limit';
+import { getServerCredits } from '@/lib/credits-server';
 
 export async function POST(req: NextRequest) {
   try {
     // Verify authentication
     const auth = await authenticateRequest(req);
     if (isAuthError(auth)) return auth;
+
+    // Rate limiting
+    const credits = await getServerCredits(auth.user.id);
+    const plan = (credits.plan || 'free') as PlanTier;
+    const rlResult = await rateLimit(auth.user.id, getScrapeRateLimit(plan));
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please slow down.' },
+        { status: 429, headers: rateLimitHeaders(rlResult) }
+      );
+    }
 
     const { query } = await req.json();
     if (!query || typeof query !== 'string') {

@@ -4,11 +4,24 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 // Use a dedicated Supabase admin client for webhook operations
-// This bypasses RLS since webhooks have no user session
+// Service role key bypasses RLS since webhooks have no user session
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+/**
+ * Get current_period_end from a Stripe subscription.
+ * In newer Stripe SDK versions, this field moved from the subscription
+ * to the subscription item level.
+ */
+function getSubscriptionPeriodEnd(sub: Stripe.Subscription): number {
+  // Try subscription item level first (newer Stripe SDK)
+  const itemPeriodEnd = sub.items?.data?.[0]?.current_period_end;
+  if (itemPeriodEnd) return itemPeriodEnd;
+  // Fallback: access directly with type assertion (older Stripe SDK)
+  return (sub as unknown as { current_period_end: number }).current_period_end ?? Math.floor(Date.now() / 1000);
+}
 
 async function upsertSubscription(
   userId: string,
@@ -72,7 +85,7 @@ export async function POST(req: NextRequest) {
             stripe_subscription_id: subscription.id,
             plan,
             status: subscription.status === 'trialing' ? 'active' : subscription.status,
-            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            current_period_end: new Date(getSubscriptionPeriodEnd(subscription) * 1000).toISOString(),
             cancel_at_period_end: subscription.cancel_at_period_end,
           });
 
@@ -140,7 +153,7 @@ export async function POST(req: NextRequest) {
           stripe_subscription_id: sub.id,
           plan,
           status: sub.status === 'trialing' ? 'active' : sub.status,
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+          current_period_end: new Date(getSubscriptionPeriodEnd(sub) * 1000).toISOString(),
           cancel_at_period_end: sub.cancel_at_period_end,
         });
 
@@ -161,7 +174,7 @@ export async function POST(req: NextRequest) {
           stripe_subscription_id: sub.id,
           plan: 'free',
           status: 'canceled',
-          current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
+          current_period_end: new Date(getSubscriptionPeriodEnd(sub) * 1000).toISOString(),
           cancel_at_period_end: false,
         });
 

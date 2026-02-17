@@ -98,8 +98,8 @@ export default function FeedCard({ item, onDelete }: FeedCardProps) {
   return (
     <div
       className={clsx(
-        'bg-surface border border-border rounded-xl border-l-4 cursor-pointer group relative',
-        'shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:-translate-y-0.5',
+        'glass-card !rounded-xl border-l-4 cursor-pointer group relative',
+        'hover:-translate-y-0.5',
         'transition-all duration-200',
         config.border,
         expanded && 'ring-1 ring-accent/20'

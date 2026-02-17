@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Search, ArrowUpDown, ArrowUp, ArrowDown, TrendingUp, Globe, Sparkles, ChevronDown, Check, RefreshCw } from 'lucide-react';
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, TrendingUp, Globe, Sparkles, ChevronDown, Check, RefreshCw, Hash } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { getKeywords, saveKeyword } from '@/lib/db';
 import { useActiveApp } from '@/lib/useActiveApp';
+import EmptyState from '@/components/EmptyState';
 import clsx from 'clsx';
 import { apiFetch } from '@/lib/api-client';
 
@@ -71,61 +72,7 @@ function appendSparklineValue(keyword: string, newRank: number) {
   } catch {}
 }
 
-const KEYWORDS_RAW = [
-  { keyword: 'productivity app assistant', volume: 74000, difficulty: 45, rank: 2, change: 8, since: '2025-06-01' },
-  { keyword: 'ai task manager', volume: 68000, difficulty: 42, rank: 3, change: 6, since: '2025-06-10' },
-  { keyword: 'smart to-do list app', volume: 52000, difficulty: 38, rank: 2, change: 9, since: '2025-07-15' },
-  { keyword: 'ai planner app', volume: 120000, difficulty: 55, rank: 4, change: 12, since: '2025-08-01' },
-  { keyword: 'daily task organizer', volume: 45000, difficulty: 35, rank: 1, change: 7, since: '2025-09-20' },
-  { keyword: 'ai productivity assistant', volume: 85000, difficulty: 50, rank: 3, change: 10, since: '2025-06-01' },
-  { keyword: 'focus timer app', volume: 42000, difficulty: 32, rank: 2, change: 8, since: '2025-10-05' },
-  { keyword: 'habit tracker with ai', volume: 58000, difficulty: 40, rank: 3, change: 5, since: '2025-08-12' },
-  { keyword: 'workflow automation app', volume: 38000, difficulty: 36, rank: 1, change: 11, since: '2025-09-01' },
-  { keyword: 'ai scheduling assistant', volume: 31000, difficulty: 30, rank: 2, change: 9, since: '2025-10-12' },
-  { keyword: 'best productivity tools', volume: 95000, difficulty: 62, rank: 5, change: 4, since: '2025-05-20' },
-  { keyword: 'task prioritization app', volume: 29000, difficulty: 28, rank: 1, change: 6, since: '2025-11-01' },
-  { keyword: 'project management tool', volume: 67000, difficulty: 55, rank: 7, change: 3, since: '2025-07-08' },
-  { keyword: 'ai note taking app', volume: 48000, difficulty: 38, rank: 4, change: 5, since: '2025-08-18' },
-  { keyword: 'automated task planner', volume: 35000, difficulty: 33, rank: 2, change: 8, since: '2025-09-15' },
-  { keyword: 'how to be more productive', volume: 110000, difficulty: 70, rank: 8, change: 2, since: '2025-05-15' },
-  { keyword: 'smart reminder app', volume: 27000, difficulty: 29, rank: 1, change: 7, since: '2025-10-25' },
-  { keyword: 'ai workflow optimizer', volume: 33000, difficulty: 31, rank: 2, change: 6, since: '2025-09-10' },
-  { keyword: 'time tracking productivity', volume: 41000, difficulty: 44, rank: 6, change: 3, since: '2025-08-22' },
-  { keyword: 'better task management', volume: 56000, difficulty: 48, rank: 5, change: 4, since: '2025-07-20' },
-  { keyword: 'ai focus assistant', volume: 22000, difficulty: 25, rank: 1, change: 9, since: '2025-11-10' },
-  { keyword: 'productivity coach ai', volume: 39000, difficulty: 37, rank: 3, change: 7, since: '2025-10-02' },
-  { keyword: 'smart productivity app', volume: 18000, difficulty: 15, rank: 1, change: 12, since: '2025-10-25' },
-  { keyword: 'intelligent task planner', volume: 25000, difficulty: 30, rank: 2, change: 8, since: '2025-09-08' },
-  { keyword: 'deadline management app', volume: 44000, difficulty: 42, rank: 4, change: 5, since: '2025-08-05' },
-  { keyword: 'best task manager app', volume: 62000, difficulty: 52, rank: 6, change: 3, since: '2025-05-01' },
-  { keyword: 'ai powered to-do list', volume: 37000, difficulty: 34, rank: 2, change: 7, since: '2025-05-10' },
-  { keyword: 'goal setting app', volume: 78000, difficulty: 58, rank: 9, change: 1, since: '2025-07-12' },
-  { keyword: 'daily planner ideas', volume: 50000, difficulty: 46, rank: 5, change: 4, since: '2025-08-28' },
-  { keyword: 'ai personal assistant app', volume: 46000, difficulty: 40, rank: 3, change: 6, since: '2025-09-22' },
-  { keyword: 'time blocking app', volume: 34000, difficulty: 36, rank: 4, change: 5, since: '2025-06-15' },
-  { keyword: 'ai calendar assistant', volume: 28000, difficulty: 32, rank: 2, change: 8, since: '2025-10-18' },
-  { keyword: 'best planning apps', volume: 53000, difficulty: 45, rank: 6, change: 3, since: '2025-07-25' },
-  { keyword: 'how to stop procrastinating', volume: 71000, difficulty: 55, rank: 7, change: 2, since: '2025-08-10' },
-  { keyword: 'ai task generator', volume: 20000, difficulty: 22, rank: 1, change: 10, since: '2025-11-20' },
-  { keyword: 'smart scheduling tool', volume: 16000, difficulty: 20, rank: 1, change: 9, since: '2025-10-28' },
-  { keyword: 'best ai productivity tools', volume: 43000, difficulty: 39, rank: 3, change: 6, since: '2025-09-28' },
-  { keyword: 'task automation helper', volume: 32000, difficulty: 28, rank: 2, change: 11, since: '2025-10-15' },
-  { keyword: 'improve daily productivity', volume: 47000, difficulty: 43, rank: 5, change: 4, since: '2025-06-30' },
-  { keyword: 'ai work assistant app', volume: 24000, difficulty: 26, rank: 1, change: 8, since: '2025-09-05' },
-  { keyword: 'smart task tracker', volume: 30000, difficulty: 31, rank: 2, change: 7, since: '2025-10-22' },
-  { keyword: 'project planning tips', volume: 36000, difficulty: 35, rank: 3, change: 6, since: '2025-08-15' },
-  { keyword: 'ai workspace manager', volume: 40000, difficulty: 38, rank: 4, change: 5, since: '2025-09-18' },
-  { keyword: 'automated daily planner', volume: 26000, difficulty: 27, rank: 2, change: 9, since: '2025-11-08' },
-  { keyword: 'team task management app', volume: 55000, difficulty: 47, rank: 6, change: 3, since: '2025-05-25' },
-  { keyword: 'first time productivity app', volume: 19000, difficulty: 23, rank: 1, change: 10, since: '2025-11-05' },
-  { keyword: 'ai daily routine planner', volume: 21000, difficulty: 25, rank: 2, change: 8, since: '2025-10-30' },
-  { keyword: 'goal tracker with reminders', volume: 15000, difficulty: 18, rank: 1, change: 11, since: '2025-11-15' },
-  { keyword: 'ai productivity coach app', volume: 23000, difficulty: 24, rank: 1, change: 9, since: '2025-10-08' },
-  { keyword: 'stop procrastinating app', volume: 38000, difficulty: 40, rank: 4, change: 6, since: '2025-07-30' },
-];
-
-// Static version for SSR/initial render - sparklines added dynamically in component
-const KEYWORDS_DATA_STATIC = KEYWORDS_RAW.map((k, i) => ({ ...k, id: i, sparkline: [] as SparklinePoint[] }));
+// Keywords now loaded from Supabase — no hardcoded mock data
 
 const COUNTRY_MULTIPLIERS: Record<string, { label: string; flag: string; mult: number }> = {
   US: { label: 'United States', flag: '🇺🇸', mult: 1.0 },
@@ -188,12 +135,15 @@ export default function KeywordsPage() {
   const [realKeywords, setRealKeywords] = useState<string[]>([]);
   const [sparklines, setSparklines] = useState<StoredSparklines>({});
 
-  const [dbKeywords, setDbKeywords] = useState<typeof KEYWORDS_DATA_STATIC | null>(null);
+  type KeywordRow = { id: number; keyword: string; volume: number; difficulty: number; rank: number; change: number; since: string; sparkline: SparklinePoint[] };
+  const [dbKeywords, setDbKeywords] = useState<KeywordRow[] | null>(null);
 
-  // Load sparklines from localStorage on mount
+  // Load sparklines from localStorage when dbKeywords are available
   useEffect(() => {
-    setSparklines(loadOrGenerateSparklines(KEYWORDS_RAW));
-  }, []);
+    if (dbKeywords && dbKeywords.length > 0) {
+      setSparklines(loadOrGenerateSparklines(dbKeywords));
+    }
+  }, [dbKeywords]);
 
   // Set simulator defaults from active app
   const [simInited, setSimInited] = useState(false);
@@ -277,14 +227,16 @@ export default function KeywordsPage() {
       }
     }
     loadKeywords();
-  }, [mounted, app?.id]);
+  }, [mounted, app?.id, autoResearched, country]);
 
   const refreshSparklines = useCallback(() => {
-    setSparklines(loadOrGenerateSparklines(KEYWORDS_RAW, true));
-  }, []);
+    if (dbKeywords && dbKeywords.length > 0) {
+      setSparklines(loadOrGenerateSparklines(dbKeywords, true));
+    }
+  }, [dbKeywords]);
 
   const KEYWORDS_DATA = useMemo(() => {
-    const base = dbKeywords || KEYWORDS_DATA_STATIC;
+    const base = dbKeywords || [];
     return base.map(k => ({
       ...k,
       sparkline: sparklines[k.keyword] || [],
@@ -315,7 +267,7 @@ export default function KeywordsPage() {
     } finally {
       setAiSimLoading(false);
     }
-  }, [simTitle]);
+  }, [simTitle, app?.name, app?.category, app?.platform, KEYWORDS_DATA]);
 
   const suggestWithAI = useCallback(async () => {
     setSuggestLoading(true);
